@@ -1,60 +1,68 @@
-import { Toaster } from "@/components/ui/sonner";
-
 import {
-	HeadContent,
-	Outlet,
-	Scripts,
-	createRootRouteWithContext,
-	useRouterState,
-} from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import Header from "../components/header";
-import appCss from "../index.css?url";
-import Loader from "@/components/loader";
+  HeadContent,
+  Link,
+  Outlet,
+  Scripts,
+  createRootRouteWithContext,
+} from "@tanstack/react-router"
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import appCss from "~/index.css?url"
 
 export interface RouterAppContext {}
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
-	head: () => ({
-		meta: [
-			{
-				charSet: "utf-8",
-			},
-			{
-				name: "viewport",
-				content: "width=device-width, initial-scale=1",
-			},
-			{
-				title: "My App",
-			},
-		],
-		links: [
-			{
-				rel: "stylesheet",
-				href: appCss,
-			},
-		],
-	}),
-
-	component: RootDocument,
-});
+  head: () => ({
+    meta: [
+      {
+        charSet: "utf-8",
+      },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
+      },
+      {
+        title: "Speedcube App",
+      },
+    ],
+    links: [
+      {
+        rel: "stylesheet",
+        href: appCss,
+      },
+    ],
+  }),
+  component: RootDocument,
+  notFoundComponent: () => (
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+      <h1 className="text-2xl font-bold">404 - Page Not Found</h1>
+      <Link
+        to="/"
+        draggable={false}
+        className="bg-primary rounded-md px-6 py-2 text-primary-foreground shadow-md hover:scale-102 active:scale-98 transition-all"
+      >
+        Go Home
+      </Link>
+    </div>
+  ),
+})
 
 function RootDocument() {
-	const isFetching = useRouterState({ select: (s) => s.isLoading });
-	return (
-		<html lang="en" className="dark">
-			<head>
-				<HeadContent />
-			</head>
-			<body>
-				<div className="grid h-svh grid-rows-[auto_1fr]">
-					<Header />
-					{isFetching ? <Loader /> : <Outlet />}
-				</div>
-				<Toaster richColors />
-				<TanStackRouterDevtools position="bottom-left" />
-				<Scripts />
-			</body>
-		</html>
-	);
+  return (
+    <html lang="en">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <Outlet />
+        {import.meta.env.DEV ? (
+          <>
+            <TanStackRouterDevtools position="bottom-right" />
+            <ReactQueryDevtools buttonPosition="bottom-left" />
+          </>
+        ) : null}
+        <Scripts />
+      </body>
+    </html>
+  )
 }

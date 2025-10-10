@@ -1,28 +1,26 @@
-import { Link } from '@tanstack/react-router';
-import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { Link } from "@tanstack/react-router"
+import { HomeLayout } from "fumadocs-ui/layouts/home"
 
 export function NotFound() {
   return (
     <HomeLayout
       nav={{
-        title: 'Tanstack Start',
+        title: "Speedcube Docs",
       }}
-      className="text-center py-32 justify-center"
+      className="py-32"
     >
-      <div className="flex flex-col items-center gap-4">
-        <h1 className="text-6xl font-bold text-fd-muted-foreground">404</h1>
-        <h2 className="text-2xl font-semibold">Page Not Found</h2>
-        <p className="text-fd-muted-foreground max-w-md">
-          The page you are looking for might have been removed, had its name
-          changed, or is temporarily unavailable.
+      <div className="mx-auto flex max-w-md flex-col items-center gap-3 text-center">
+        <h1 className="text-5xl font-semibold text-muted-foreground">404</h1>
+        <p className="text-muted-foreground">
+          We could not find the page you were looking for.
         </p>
         <Link
           to="/"
-          className="mt-4 px-4 py-2 rounded-lg bg-fd-primary text-fd-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity"
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
         >
-          Back to Home
+          Back to home
         </Link>
       </div>
     </HomeLayout>
-  );
+  )
 }

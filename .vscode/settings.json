@@ -1,0 +1,6 @@
+{
+  "tailwindCSS.experimental.configFile": {
+    "apps/fumadocs/src/styles/app.css": "apps/fumadocs/src/**",
+    "apps/web/src/index.css": "apps/web/src/**"
+  }
+}

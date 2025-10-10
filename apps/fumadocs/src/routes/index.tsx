@@ -1,24 +1,28 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { HomeLayout } from 'fumadocs-ui/layouts/home';
-import { baseOptions } from '@/lib/layout.shared';
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { HomeLayout } from "fumadocs-ui/layouts/home"
+import { baseOptions } from "../lib/layout.shared"
 
-export const Route = createFileRoute('/')({
-  component: Home,
-});
+export const Route = createFileRoute("/")({
+  component: HomeRoute,
+})
 
-function Home() {
+function HomeRoute() {
   return (
-    <HomeLayout {...baseOptions()} className="text-center py-32 justify-center">
-      <h1 className="font-medium text-xl mb-4">Fumadocs on Tanstack Start.</h1>
-      <Link
-        to="/docs/$"
-        params={{
-          _splat: '',
-        }}
-        className="px-3 py-2 rounded-lg bg-fd-primary text-fd-primary-foreground font-medium text-sm mx-auto"
-      >
-        Open Docs
-      </Link>
+    <HomeLayout {...baseOptions()} className="py-28">
+      <div className="mx-auto flex max-w-lg flex-col items-center gap-4 text-center">
+        <h1 className="text-3xl font-semibold">Speedcube docs starter</h1>
+        <p className="text-muted-foreground">
+          Use this space to introduce your project. Your documentation content
+          lives in `apps/fumadocs/content`.
+        </p>
+        <Link
+          to="/docs/$"
+          params={{ _splat: "" }}
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          Browse docs
+        </Link>
+      </div>
     </HomeLayout>
-  );
+  )
 }

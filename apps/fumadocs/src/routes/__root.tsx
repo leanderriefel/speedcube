@@ -3,26 +3,27 @@ import {
   HeadContent,
   Outlet,
   Scripts,
-} from '@tanstack/react-router';
-import * as React from 'react';
-import appCss from '@/styles/app.css?url';
-import { RootProvider } from 'fumadocs-ui/provider/tanstack';
+} from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import * as React from "react";
+import { RootProvider } from "fumadocs-ui/provider/tanstack";
+import appCss from "../styles/app.css?url";
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
       {
-        charSet: 'utf-8',
+        charSet: "utf-8",
       },
       {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
       },
       {
-        title: 'Fumadocs on TanStack Start',
+        title: "Speedcube Docs",
       },
     ],
-    links: [{ rel: 'stylesheet', href: appCss }],
+    links: [{ rel: "stylesheet", href: appCss }],
   }),
   component: RootComponent,
 });
@@ -41,8 +42,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="flex flex-col min-h-screen">
+      <body className="flex min-h-screen flex-col">
         <RootProvider>{children}</RootProvider>
+        {import.meta.env.DEV ? (
+          <TanStackRouterDevtools position="bottom-left" />
+        ) : null}
         <Scripts />
       </body>
     </html>
