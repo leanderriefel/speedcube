@@ -8,6 +8,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import appCss from "~/index.css?url"
+import { SessionProvider } from "~/components/session-provider"
 
 export interface RouterAppContext {}
 
@@ -53,15 +54,18 @@ function RootDocument() {
       <head>
         <HeadContent />
       </head>
+
       <body>
-        <Outlet />
-        {import.meta.env.DEV ? (
-          <>
-            <TanStackRouterDevtools position="bottom-right" />
-            <ReactQueryDevtools buttonPosition="bottom-left" />
-          </>
-        ) : null}
-        <Scripts />
+        <SessionProvider>
+          <Outlet />
+          {import.meta.env.DEV ? (
+            <>
+              <TanStackRouterDevtools position="top-right" />
+              <ReactQueryDevtools buttonPosition="top-left" />
+            </>
+          ) : null}
+          <Scripts />
+        </SessionProvider>
       </body>
     </html>
   )
