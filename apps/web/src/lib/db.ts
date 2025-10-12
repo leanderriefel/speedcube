@@ -27,7 +27,6 @@ export const solveCollection = createCollection(
     getKey: (solve) => solve.id,
     dbName: "speedcube",
     tableName: "solves",
-    startSync: true,
   })
 )
 
@@ -38,6 +37,5 @@ export const sessionCollection = createCollection(
     getKey: (session) => session.id,
     dbName: "speedcube",
     tableName: "sessions",
-    startSync: true,
   })
 )
