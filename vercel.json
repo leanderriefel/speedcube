@@ -1,0 +1,26 @@
+{
+  "builds": [
+    {
+      "src": "apps/web/api/index.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "apps/web/dist/client/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/apps/web/dist/client/assets/$1"
+    },
+    {
+      "src": "/robots.txt",
+      "dest": "/apps/web/dist/client/robots.txt"
+    },
+    {
+      "src": "/.*",
+      "dest": "/apps/web/api/index.ts"
+    }
+  ]
+}
