@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  tanstack-dexie-db-collection:
+    hash: ca6ddaa1714ed94324b72c92bf29608be908ac3159cff5faa18e19552ed1cd3f
+    path: patches/tanstack-dexie-db-collection.patch
+
 importers:
 
   .:
@@ -126,7 +131,7 @@ importers:
         version: 0.545.0(react@19.2.0)
       nitro:
         specifier: npm:nitro-nightly@latest
-        version: nitro-nightly@3.0.1-20251012-084955-51d76841(chokidar@4.0.3)(lru-cache@11.2.2)(rolldown@1.0.0-beta.43)(vite@7.1.9(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6))
+        version: nitro-nightly@3.0.1-20251013-093643-3afbc402(chokidar@4.0.3)(lru-cache@11.2.2)(rolldown@1.0.0-beta.43)(vite@7.1.9(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6))
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -139,6 +144,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.14
         version: 4.1.14
+      tanstack-dexie-db-collection:
+        specifier: ^0.1.2
+        version: 0.1.2(patch_hash=ca6ddaa1714ed94324b72c92bf29608be908ac3159cff5faa18e19552ed1cd3f)(dexie@4.2.1)(typescript@5.9.3)
       zod:
         specifier: ^4.1.12
         version: 4.1.12
@@ -146,6 +154,12 @@ importers:
       '@tanstack/react-router-devtools':
         specifier: ^1.132.51
         version: 1.132.51(@tanstack/react-router@1.132.47(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(@tanstack/router-core@1.132.47)(@types/node@24.7.2)(csstype@3.1.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(solid-js@1.9.9)(tiny-invariant@1.3.3)(tsx@4.20.6)
+      '@types/react':
+        specifier: ^19.2.2
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: ^19.2.1
+        version: 19.2.1(@types/react@19.2.2)
       '@vitejs/plugin-react':
         specifier: ^5.0.4
         version: 5.0.4(vite@7.1.9(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6))
@@ -1741,6 +1755,9 @@ packages:
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
 
+  dexie@4.2.1:
+    resolution: {integrity: sha512-Ckej0NS6jxQ4Po3OrSQBFddayRhTCic2DoCAG5zacOfOVB9P2Q5Xc5uL/nVa7ZVs+HdMnvUPzLFCB/JwpB6Csg==}
+
   didyoumean@1.2.2:
     resolution: {integrity: sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw==}
 
@@ -2442,8 +2459,8 @@ packages:
   nf3@0.1.1:
     resolution: {integrity: sha512-iJfiw84oKzsOOM+zqr0fycjgLx2wLw1RrGLHd9qxUPwMtut6GjBalDS9TRPZJXMAZjUv9ghLgtDrhzqcFJ8eTQ==}
 
-  nitro-nightly@3.0.1-20251012-084955-51d76841:
-    resolution: {integrity: sha512-kbht+ULXlKfzNPRpf3RrZHkqRFo8/jXJhbgCT31A1bGJfFNedAZDHSkbYKhN+fgxvYWwot5bIL4bFYS+RSQuHA==}
+  nitro-nightly@3.0.1-20251013-093643-3afbc402:
+    resolution: {integrity: sha512-ZI/KFETy2w4vhbDnkXP5qMvONSOqCz0iaYFSRco5LUAvZxTpSK2v59BrTzhVGv5OI7oOZnIXtfHC+PpDu3x+iQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -2761,6 +2778,12 @@ packages:
 
   tailwindcss@4.1.14:
     resolution: {integrity: sha512-b7pCxjGO98LnxVkKjaZSDeNuljC4ueKUddjENJOADtubtdo8llTaJy7HwBMeLNSSo2N5QIAgklslK1+Ir8r6CA==}
+
+  tanstack-dexie-db-collection@0.1.2:
+    resolution: {integrity: sha512-xPkPdU9b5KPUXIGWTnGaOTKkLOH065J2yIGUDZs/1k04sjBgEQZ+EKQmGR0kIyvGAheQBtRUcBS4tCcJpgP7Mw==}
+    peerDependencies:
+      dexie: '>=4.2.0'
+      typescript: '>=4.7'
 
   tapable@2.3.0:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
@@ -4772,6 +4795,8 @@ snapshots:
     dependencies:
       dequal: 2.0.3
 
+  dexie@4.2.1: {}
+
   didyoumean@1.2.2: {}
 
   diff@8.0.2: {}
@@ -5744,7 +5769,7 @@ snapshots:
 
   nf3@0.1.1: {}
 
-  nitro-nightly@3.0.1-20251012-084955-51d76841(chokidar@4.0.3)(lru-cache@11.2.2)(rolldown@1.0.0-beta.43)(vite@7.1.9(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)):
+  nitro-nightly@3.0.1-20251013-093643-3afbc402(chokidar@4.0.3)(lru-cache@11.2.2)(rolldown@1.0.0-beta.43)(vite@7.1.9(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)):
     dependencies:
       consola: 3.4.2
       cookie-es: 2.0.0
@@ -6172,6 +6197,16 @@ snapshots:
   tailwind-merge@3.3.1: {}
 
   tailwindcss@4.1.14: {}
+
+  tanstack-dexie-db-collection@0.1.2(patch_hash=ca6ddaa1714ed94324b72c92bf29608be908ac3159cff5faa18e19552ed1cd3f)(dexie@4.2.1)(typescript@5.9.3):
+    dependencies:
+      '@standard-schema/spec': 1.0.0
+      '@tanstack/db': 0.4.8(typescript@5.9.3)
+      debug: 4.4.3
+      dexie: 4.2.1
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
 
   tapable@2.3.0: {}
 

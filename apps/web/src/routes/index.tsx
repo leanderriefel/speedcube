@@ -7,10 +7,9 @@ import { Spinner } from "~/components/ui/spinner"
 import { useTimerController } from "~/hooks/useTimerController"
 import { solveCollection } from "~/lib/db"
 import { useScramble } from "~/lib/scramble"
+import { SessionProvider } from "~/components/session-provider"
 
 const Home = () => {
-  console.log("Hi!")
-
   const { session } = useSession()
 
   const scramble = useScramble("333")
@@ -46,8 +45,6 @@ const Home = () => {
 }
 
 const HomeRoute = () => {
-  console.log("HomeRoute")
-
   return (
     <ClientOnly
       fallback={
@@ -56,7 +53,9 @@ const HomeRoute = () => {
         </div>
       }
     >
-      <Home />
+      <SessionProvider>
+        <Home />
+      </SessionProvider>
     </ClientOnly>
   )
 }
@@ -64,4 +63,14 @@ const HomeRoute = () => {
 export const Route = createFileRoute("/")({
   component: HomeRoute,
   ssr: false,
+  pendingComponent: () => (
+    <div className="flex items-center justify-center min-h-screen">
+      <Spinner className="size-8" />
+    </div>
+  ),
+  errorComponent: ({ error }) => (
+    <div className="flex items-center justify-center min-h-screen">
+      <p className="text-red-500">An error occurred: {error.message}</p>
+    </div>
+  ),
 })

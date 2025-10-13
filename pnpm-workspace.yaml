@@ -5,3 +5,6 @@ packages:
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - esbuild
+
+patchedDependencies:
+  tanstack-dexie-db-collection: patches/tanstack-dexie-db-collection.patch

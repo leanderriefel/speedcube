@@ -9,9 +9,6 @@ export default defineConfig({
   server: {
     port: 3000,
   },
-  experimental: {
-    enableNativePlugin: true,
-  },
   optimizeDeps: {
     exclude: ["cubing"],
   },

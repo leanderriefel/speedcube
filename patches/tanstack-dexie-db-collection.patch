@@ -1,0 +1,95 @@
+diff --git a/dist/cjs/dexie.cjs b/dist/cjs/dexie.cjs
+index 4ed5abec2551da291a7ed009a6915a6e0a840998..8f158ac516ee6dbd999c2b6c0415371c76448cf3 100644
+--- a/dist/cjs/dexie.cjs
++++ b/dist/cjs/dexie.cjs
+@@ -3,7 +3,20 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
+ const Dexie = require("dexie");
+ const DebugModule = require("debug");
+ const helper = require("./helper.cjs");
+-const debug = DebugModule.debug(`ts/db:dexie`);
++const resolveDebugFactory = (mod) => {
++  if (typeof mod === "function") {
++    return mod;
++  }
++  if (typeof (mod == null ? void 0 : mod.debug) === "function") {
++    return mod.debug;
++  }
++  if (typeof (mod == null ? void 0 : mod.default) === "function") {
++    return mod.default;
++  }
++  return null;
++};
++const debug = (resolveDebugFactory(DebugModule)?.(`ts/db:dexie`)) ?? ((..._args) => {
++});
+ function dexieCollectionOptions(config) {
+   const seenIds = /* @__PURE__ */ new Map();
+   const ackedIds = /* @__PURE__ */ new Set();
+diff --git a/dist/esm/dexie.js b/dist/esm/dexie.js
+index 78b233f5f000baf6eabd2f26868f762b28e1b3fa..3d81f785fc04ea24dbc4610277b7fca7b8a1994f 100644
+--- a/dist/esm/dexie.js
++++ b/dist/esm/dexie.js
+@@ -1,7 +1,20 @@
+ import Dexie, { liveQuery } from "dexie";
+ import DebugModule from "debug";
+ import { addDexieMetadata, stripDexieFields } from "./helper.js";
+-const debug = DebugModule.debug(`ts/db:dexie`);
++const resolveDebugFactory = (mod) => {
++  if (typeof mod === "function") {
++    return mod;
++  }
++  if (typeof (mod == null ? void 0 : mod.debug) === "function") {
++    return mod.debug;
++  }
++  if (typeof (mod == null ? void 0 : mod.default) === "function") {
++    return mod.default;
++  }
++  return null;
++};
++const debug = (resolveDebugFactory(DebugModule)?.(`ts/db:dexie`)) ?? ((..._args) => {
++});
+ function dexieCollectionOptions(config) {
+   const seenIds = /* @__PURE__ */ new Map();
+   const ackedIds = /* @__PURE__ */ new Set();
+diff --git a/src/dexie.ts b/src/dexie.ts
+index 4f317888a5092d01b053a6b0bcb076b39e5b2d89..5f23da0b5647ea1ccf3023b429acef6e0c039905 100644
+--- a/src/dexie.ts
++++ b/src/dexie.ts
+@@ -13,7 +13,37 @@ import type {
+ } from "@tanstack/db"
+ import type { Subscription, Table } from "dexie"
+ 
+-const debug = DebugModule.debug(`ts/db:dexie`)
++const resolveDebugFactory = (
++  mod: typeof DebugModule
++): ((namespace: string) => unknown) | null => {
++  if (typeof mod === "function") {
++    return mod as unknown as (namespace: string) => unknown
++  }
++
++  const anyModule = mod as unknown as {
++    debug?: (namespace: string) => unknown
++    default?: (namespace: string) => unknown
++  }
++
++  if (typeof anyModule?.debug === "function") {
++    return anyModule.debug
++  }
++
++  if (typeof anyModule?.default === "function") {
++    return anyModule.default
++  }
++
++  return null
++}
++
++const resolvedDebugFactory = resolveDebugFactory(DebugModule)
++const debug =
++  (resolvedDebugFactory?.(`ts/db:dexie`) as
++    | ((...args: Array<unknown>) => void)
++    | undefined) ??
++  ((..._args: Array<unknown>) => {
++    // noop fallback when the debug module is unavailable
++  })
+ 
+ // Optional codec interface for data transformation
+ export interface DexieCodec<TItem, TStored = TItem> {
