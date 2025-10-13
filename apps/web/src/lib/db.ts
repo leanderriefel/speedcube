@@ -1,5 +1,7 @@
-import { createCollection } from "@tanstack/react-db"
-import { dexieCollectionOptions } from "tanstack-dexie-db-collection"
+import {
+  createCollection,
+  localStorageCollectionOptions,
+} from "@tanstack/react-db"
 import * as z from "zod"
 import type { Event } from "~/lib/scramble"
 
@@ -21,21 +23,19 @@ export type Solve = z.infer<typeof solveSchema>
 export type Session = z.infer<typeof sessionSchema>
 
 export const solveCollection = createCollection(
-  dexieCollectionOptions({
+  localStorageCollectionOptions({
     id: "solves",
+    storageKey: "speedcube-solves",
     schema: solveSchema,
     getKey: (solve) => solve.id,
-    dbName: "speedcube",
-    tableName: "solves",
   })
 )
 
 export const sessionCollection = createCollection(
-  dexieCollectionOptions({
+  localStorageCollectionOptions({
     id: "sessions",
+    storageKey: "speedcube-sessions",
     schema: sessionSchema,
     getKey: (session) => session.id,
-    dbName: "speedcube",
-    tableName: "sessions",
   })
 )

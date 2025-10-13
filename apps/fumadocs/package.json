@@ -11,7 +11,7 @@
   "dependencies": {
     "@tanstack/react-router": "^1.132.47",
     "@tanstack/react-router-devtools": "^1.132.51",
-    "@tanstack/react-start": "^1.132.53",
+    "@tanstack/react-start": "^1.132.56",
     "fumadocs-core": "15.8.5",
     "fumadocs-mdx": "12.0.3",
     "fumadocs-ui": "15.8.5",

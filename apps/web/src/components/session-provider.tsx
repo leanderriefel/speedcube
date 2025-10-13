@@ -1,3 +1,5 @@
+console.log("SessionProvider 0")
+
 import { eq, useLiveQuery, type CollectionStatus } from "@tanstack/react-db"
 import { createIsomorphicFn } from "@tanstack/react-start"
 import {
@@ -8,6 +10,7 @@ import {
   useState,
   type PropsWithChildren,
 } from "react"
+
 import { sessionCollection } from "~/lib/db"
 
 type SessionContextValue = {
@@ -43,6 +46,8 @@ export const SessionContext = createContext<SessionContextValue>(null!)
 export const SessionProvider = ({ children }: PropsWithChildren) => {
   const [isClient, setIsClient] = useState(false)
 
+  console.log("SessionProvider 1")
+
   useEffect(() => {
     setIsClient(true)
   }, [])
@@ -55,6 +60,7 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
     )
   }
 
+  console.log("SessionProvider 2")
   return <ClientSessionProvider>{children}</ClientSessionProvider>
 }
 
@@ -78,6 +84,8 @@ const ClientSessionProvider = ({ children }: PropsWithChildren) => {
     localStorage.setItem("speedcube-session-id", id)
     _setSessionId(id)
   }, [])
+
+  console.log("ClientSessionProvider 1")
 
   const session = useLiveQuery(
     (q) =>

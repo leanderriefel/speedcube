@@ -1,4 +1,5 @@
 import {
+  ClientOnly,
   HeadContent,
   Link,
   Outlet,
@@ -9,6 +10,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import appCss from "~/index.css?url"
 import { SessionProvider } from "~/components/session-provider"
+import { Spinner } from "~/components/ui/spinner"
 
 export interface RouterAppContext {}
 

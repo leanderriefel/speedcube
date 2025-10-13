@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { ClientOnly, createFileRoute } from "@tanstack/react-router"
 import { ScrambleDisplay } from "~/components/scramble-display"
 import { SessionDisplay } from "~/components/session-display"
 import { useSession } from "~/components/session-provider"
@@ -8,7 +8,9 @@ import { useTimerController } from "~/hooks/useTimerController"
 import { solveCollection } from "~/lib/db"
 import { useScramble } from "~/lib/scramble"
 
-const HomeRoute = () => {
+const Home = () => {
+  console.log("Hi!")
+
   const { session } = useSession()
 
   const scramble = useScramble("333")
@@ -43,6 +45,23 @@ const HomeRoute = () => {
   )
 }
 
+const HomeRoute = () => {
+  console.log("HomeRoute")
+
+  return (
+    <ClientOnly
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <Home />
+    </ClientOnly>
+  )
+}
+
 export const Route = createFileRoute("/")({
   component: HomeRoute,
+  ssr: false,
 })
