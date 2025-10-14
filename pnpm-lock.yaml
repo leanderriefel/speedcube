@@ -1388,6 +1388,11 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
+  '@tanstack/db-ivm@0.1.10':
+    resolution: {integrity: sha512-AWKpe431GqPp94XOlnyYchLUmUVJpjTwdb3ID0gBfSwPDir5/lXqdA1tkeyxv4kbwV8TLOC9Kch/nVLPw5D0cw==}
+    peerDependencies:
+      typescript: '>=4.7'
+
   '@tanstack/db-ivm@0.1.9':
     resolution: {integrity: sha512-EfrtTn34SQ6HOw1ZI4O1DKsrCSCzMufIYMpAYlO6kE7/DMZ7M9N8tQdXYyN2ZasL0zR8zjB1AHj4tMqcmPIt7w==}
     peerDependencies:
@@ -1395,6 +1400,11 @@ packages:
 
   '@tanstack/db@0.4.8':
     resolution: {integrity: sha512-KD4unbzac8Iyb+UB/EvW0WlM8Z/YTwHZWQw+AviGGYvfmgtaz/vzAFGQ2JQNTv0ALQdRsfV/qpYPkOADyqh+AA==}
+    peerDependencies:
+      typescript: '>=4.7'
+
+  '@tanstack/db@0.4.9':
+    resolution: {integrity: sha512-8X3EaBOXGgHg6XihOGP2sJk4G6VKW8J58p+ZYeEf+mmhZF5HjWKYF8qx/+vatRISSMNKhcaZrhgfLBdqnpTYsg==}
     peerDependencies:
       typescript: '>=4.7'
 
@@ -5275,6 +5285,12 @@ snapshots:
       tailwindcss: 4.1.14
       vite: 7.1.9(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
 
+  '@tanstack/db-ivm@0.1.10(typescript@5.9.3)':
+    dependencies:
+      fractional-indexing: 3.2.0
+      sorted-btree: 1.8.1
+      typescript: 5.9.3
+
   '@tanstack/db-ivm@0.1.9(typescript@5.9.3)':
     dependencies:
       fractional-indexing: 3.2.0
@@ -5285,6 +5301,12 @@ snapshots:
     dependencies:
       '@standard-schema/spec': 1.0.0
       '@tanstack/db-ivm': 0.1.9(typescript@5.9.3)
+      typescript: 5.9.3
+
+  '@tanstack/db@0.4.9(typescript@5.9.3)':
+    dependencies:
+      '@standard-schema/spec': 1.0.0
+      '@tanstack/db-ivm': 0.1.10(typescript@5.9.3)
       typescript: 5.9.3
 
   '@tanstack/directive-functions-plugin@1.132.53(vite@7.1.9(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1))':
@@ -8321,7 +8343,7 @@ snapshots:
   tanstack-dexie-db-collection@0.1.2(patch_hash=ca6ddaa1714ed94324b72c92bf29608be908ac3159cff5faa18e19552ed1cd3f)(dexie@4.2.1)(typescript@5.9.3):
     dependencies:
       '@standard-schema/spec': 1.0.0
-      '@tanstack/db': 0.4.8(typescript@5.9.3)
+      '@tanstack/db': 0.4.9(typescript@5.9.3)
       debug: 4.4.3
       dexie: 4.2.1
       typescript: 5.9.3

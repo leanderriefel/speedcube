@@ -11,7 +11,7 @@ import { createIsomorphicFn } from "@tanstack/react-start"
 
 import { sessionCollection } from "~/lib/db"
 
-console.log("SessionProvider 0")
+const storageKey = "speedcube-session-id"
 
 type SessionContextValue = {
   session: {
@@ -47,8 +47,6 @@ const SessionContext = createContext<SessionContextValue>(null!)
 export const SessionProvider = ({ children }: PropsWithChildren) => {
   const [isClient, setIsClient] = useState(false)
 
-  console.log("SessionProvider 1")
-
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsClient(true)
@@ -62,19 +60,18 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
     )
   }
 
-  console.log("SessionProvider 2")
   return <ClientSessionProvider>{children}</ClientSessionProvider>
 }
 
 const findSession = createIsomorphicFn().client(() => {
-  const storageValue = localStorage.getItem("speedcube-session-id")
+  const storageValue = localStorage.getItem(storageKey)
   if (storageValue) return storageValue
 
   const id = crypto.randomUUID()
-  localStorage.setItem("speedcube-session-id", id)
+  localStorage.setItem(storageKey, id)
   sessionCollection.insert({
     id,
-    name: "New Session",
+    name: `Session ${new Date().toLocaleDateString()}`,
   })
   return id
 })
@@ -83,11 +80,9 @@ const ClientSessionProvider = ({ children }: PropsWithChildren) => {
   const [sessionId, _setSessionId] = useState(findSession)
 
   const setSessionId = useCallback((id: string) => {
-    localStorage.setItem("speedcube-session-id", id)
+    localStorage.setItem(storageKey, id)
     _setSessionId(id)
   }, [])
-
-  console.log("ClientSessionProvider 1")
 
   const session = useLiveQuery(
     (q) =>
@@ -101,7 +96,7 @@ const ClientSessionProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     if (!session.isReady || session.data) return
 
-    localStorage.removeItem("speedcube-session-id")
+    localStorage.removeItem(storageKey)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     _setSessionId(findSession())
   }, [session.isReady, session.data, _setSessionId])

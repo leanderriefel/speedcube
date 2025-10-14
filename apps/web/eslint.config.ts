@@ -6,6 +6,7 @@ import reactHooks from "eslint-plugin-react-hooks"
 import { defineConfig } from "eslint/config"
 import tseslint from "typescript-eslint"
 
+const configDir = fileURLToPath(new URL(".", import.meta.url))
 const localGitignorePath = fileURLToPath(
   new URL("./.gitignore", import.meta.url),
 )
@@ -22,6 +23,13 @@ export default defineConfig([
   pluginReact.configs.flat["jsx-runtime"],
   reactHooks.configs.flat.recommended,
   {
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: configDir,
+      },
+    },
+  },
+  {
     settings: {
       react: {
         version: "detect",
@@ -29,3 +37,4 @@ export default defineConfig([
     },
   },
 ])
+

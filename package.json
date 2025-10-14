@@ -7,7 +7,9 @@
     "build": "turbo build",
     "check-types": "turbo check-types",
     "dev:native": "turbo -F native dev",
-    "dev:web": "turbo -F web dev"
+    "dev:web": "turbo -F web dev",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

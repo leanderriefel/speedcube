@@ -1,5 +1,8 @@
-import { createCollection } from "@tanstack/react-db"
-import { dexieCollectionOptions } from "tanstack-dexie-db-collection"
+import { createCollection, type CollectionConfig } from "@tanstack/react-db"
+import {
+  dexieCollectionOptions,
+  type DexieUtils,
+} from "tanstack-dexie-db-collection"
 import * as z from "zod"
 
 import type { Event } from "~/lib/scramble"
@@ -26,7 +29,12 @@ export const solveCollection = createCollection(
     id: "solves",
     schema: solveSchema,
     getKey: (solve) => solve.id,
-  }),
+    startSync: true,
+    dbName: "speedcube",
+  }) as unknown as CollectionConfig<Solve, string, typeof solveSchema> & {
+    schema: typeof solveSchema
+    utils: DexieUtils
+  },
 )
 
 export const sessionCollection = createCollection(
@@ -34,5 +42,11 @@ export const sessionCollection = createCollection(
     id: "sessions",
     schema: sessionSchema,
     getKey: (session) => session.id,
-  }),
+    startSync: true,
+    dbName: "speedcube",
+  }) as unknown as CollectionConfig<Session, string, typeof sessionSchema> & {
+    schema: typeof sessionSchema
+    utils: DexieUtils
+  },
 )
+

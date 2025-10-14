@@ -8,7 +8,6 @@ const Spinner = ({
   ...props
 }: ComponentProps<"svg">): JSX.Element => {
   return (
-    // @ts-expect-error - Loader2Icon is a valid SVG element but TS is complaining
     <Loader2Icon
       role="status"
       aria-label="Loading"
