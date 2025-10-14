@@ -1,6 +1,7 @@
 import { createCollection } from "@tanstack/react-db"
 import { dexieCollectionOptions } from "tanstack-dexie-db-collection"
 import * as z from "zod"
+
 import type { Event } from "~/lib/scramble"
 
 export const solveSchema = z.object({
@@ -25,7 +26,7 @@ export const solveCollection = createCollection(
     id: "solves",
     schema: solveSchema,
     getKey: (solve) => solve.id,
-  })
+  }),
 )
 
 export const sessionCollection = createCollection(
@@ -33,5 +34,5 @@ export const sessionCollection = createCollection(
     id: "sessions",
     schema: sessionSchema,
     getKey: (session) => session.id,
-  })
+  }),
 )

@@ -1,5 +1,5 @@
-import { Loader2Icon } from "lucide-react"
 import type { ComponentProps, JSX } from "react"
+import { Loader2Icon } from "lucide-react"
 
 import { cn } from "~/lib"
 

@@ -1,7 +1,3 @@
-console.log("SessionProvider 0")
-
-import { eq, useLiveQuery, type CollectionStatus } from "@tanstack/react-db"
-import { createIsomorphicFn } from "@tanstack/react-start"
 import {
   createContext,
   useCallback,
@@ -10,8 +6,12 @@ import {
   useState,
   type PropsWithChildren,
 } from "react"
+import { eq, useLiveQuery, type CollectionStatus } from "@tanstack/react-db"
+import { createIsomorphicFn } from "@tanstack/react-start"
 
 import { sessionCollection } from "~/lib/db"
+
+console.log("SessionProvider 0")
 
 type SessionContextValue = {
   session: {
@@ -41,7 +41,8 @@ const pendingContextValue: SessionContextValue = {
   setSessionId: () => {},
 }
 
-export const SessionContext = createContext<SessionContextValue>(null!)
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const SessionContext = createContext<SessionContextValue>(null!)
 
 export const SessionProvider = ({ children }: PropsWithChildren) => {
   const [isClient, setIsClient] = useState(false)
@@ -49,6 +50,7 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
   console.log("SessionProvider 1")
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsClient(true)
   }, [])
 
@@ -93,15 +95,16 @@ const ClientSessionProvider = ({ children }: PropsWithChildren) => {
         .from({ sessions: sessionCollection })
         .where(({ sessions }) => eq(sessions.id, sessionId))
         .findOne(),
-    [sessionId]
+    [sessionId],
   )
 
   useEffect(() => {
     if (!session.isReady || session.data) return
 
     localStorage.removeItem("speedcube-session-id")
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     _setSessionId(findSession())
-  }, [session.isReady, session.data, _setSessionId, findSession])
+  }, [session.isReady, session.data, _setSessionId])
 
   return (
     <SessionContext.Provider value={{ session, setSessionId }}>

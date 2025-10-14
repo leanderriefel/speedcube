@@ -1,4 +1,5 @@
 import type { RefObject } from "react"
+
 import { cn } from "~/lib"
 
 type TimerDisplayProps = {
@@ -14,7 +15,7 @@ export const TimerDisplay = ({
 }: TimerDisplayProps) => (
   <p
     ref={timerRef}
-    className={cn("text-5xl sm:text-7xl font-mono", {
+    className={cn("font-mono text-5xl sm:text-7xl", {
       "text-warning": holdingReady,
       "text-success": startReady,
       "text-foreground": !holdingReady && !startReady,

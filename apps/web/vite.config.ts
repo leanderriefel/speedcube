@@ -1,9 +1,9 @@
+import tailwindcss from "@tailwindcss/vite"
+import { tanstackStart } from "@tanstack/react-start/plugin/vite"
+import react from "@vitejs/plugin-react"
+import { nitro } from "nitro/vite"
 import { defineConfig, type PluginOption } from "vite"
 import tsConfigPaths from "vite-tsconfig-paths"
-import { tanstackStart } from "@tanstack/react-start/plugin/vite"
-import { nitro } from "nitro/vite"
-import react from "@vitejs/plugin-react"
-import tailwindcss from "@tailwindcss/vite"
 
 const forceEsWorkerFormat: PluginOption = {
   name: "force-es-worker-format",

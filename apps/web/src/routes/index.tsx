@@ -1,13 +1,13 @@
 import { ClientOnly, createFileRoute } from "@tanstack/react-router"
+
 import { ScrambleDisplay } from "~/components/scramble-display"
 import { SessionDisplay } from "~/components/session-display"
-import { useSession } from "~/components/session-provider"
+import { SessionProvider, useSession } from "~/components/session-provider"
 import { TimerDisplay } from "~/components/timer-display"
 import { Spinner } from "~/components/ui/spinner"
 import { useTimerController } from "~/hooks/useTimerController"
 import { solveCollection } from "~/lib/db"
 import { useScramble } from "~/lib/scramble"
-import { SessionProvider } from "~/components/session-provider"
 
 const Home = () => {
   const { session } = useSession()
@@ -28,7 +28,7 @@ const Home = () => {
   })
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background flex flex-col items-center justify-center">
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background">
       {session.data && (
         <>
           <ScrambleDisplay
@@ -48,7 +48,7 @@ const HomeRoute = () => {
   return (
     <ClientOnly
       fallback={
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex min-h-screen items-center justify-center">
           <Spinner className="size-8" />
         </div>
       }
@@ -64,12 +64,12 @@ export const Route = createFileRoute("/")({
   component: HomeRoute,
   ssr: false,
   pendingComponent: () => (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex min-h-screen items-center justify-center">
       <Spinner className="size-8" />
     </div>
   ),
   errorComponent: ({ error }) => (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex min-h-screen items-center justify-center">
       <p className="text-red-500">An error occurred: {error.message}</p>
     </div>
   ),

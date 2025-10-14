@@ -1,17 +1,18 @@
 import {
-  type RefObject,
   useCallback,
   useEffect,
   useEffectEvent,
   useRef,
   useState,
+  type RefObject,
 } from "react"
+
 import { formatTime } from "~/lib"
 import type { Solve } from "~/lib/db"
 
 type UseTimerControllerOptions = {
   onSolve: (
-    solve: Omit<Solve, "id" | "scramble" | "sessionId" | "date">
+    solve: Omit<Solve, "id" | "scramble" | "sessionId" | "date">,
   ) => void
 }
 
@@ -24,6 +25,7 @@ export type UseTimerControllerResult = {
 export const useTimerController = ({
   onSolve,
 }: UseTimerControllerOptions): UseTimerControllerResult => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const timerEl = useRef<HTMLParagraphElement>(null!)
   const running = useRef(false)
   const startTime = useRef(0)
@@ -34,7 +36,7 @@ export const useTimerController = ({
   const [holdingReady, setHoldingReady] = useState(false)
   const [startReady, setStartReady] = useState(false)
 
-  const render = useCallback(() => {
+  const render = useCallback(function render() {
     const elapsed =
       timerMilliseconds.current +
       (running.current ? performance.now() - startTime.current : 0)
@@ -72,7 +74,7 @@ export const useTimerController = ({
         event: "333",
       })
     },
-    [render, onSolve]
+    [render, onSolve],
   )
 
   const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
