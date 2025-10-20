@@ -10,6 +10,31 @@ import {
 import { formatTime } from "~/lib"
 import type { Solve } from "~/lib/db"
 
+const shouldIgnoreForTimer = (target: EventTarget | null): boolean => {
+  if (!(target instanceof HTMLElement)) return false
+
+  if (target.dataset.timerIgnore !== undefined) return true
+  if (target.closest("[data-timer-ignore]")) return true
+
+  if (target.isContentEditable || target.closest("[contenteditable]") !== null)
+    return true
+
+  const editable = target.closest("input, textarea, select")
+  if (!editable) return false
+
+  if (editable instanceof HTMLInputElement) {
+    const { type, readOnly, disabled } = editable
+    if (type === "button" || type === "submit" || type === "reset") return false
+    return !(readOnly || disabled)
+  }
+
+  if (editable instanceof HTMLTextAreaElement) return !editable.readOnly
+
+  if (editable instanceof HTMLSelectElement) return !editable.disabled
+
+  return false
+}
+
 type UseTimerControllerOptions = {
   onSolve: (
     solve: Omit<Solve, "id" | "scramble" | "sessionId" | "date">,
@@ -78,6 +103,8 @@ export const useTimerController = ({
   )
 
   const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
+    if (shouldIgnoreForTimer(e.target)) return
+
     if (running.current) {
       if (e.key === "Escape") handleStop(true)
       else handleStop()
@@ -96,6 +123,8 @@ export const useTimerController = ({
   })
 
   const onKeyUp = useEffectEvent((e: KeyboardEvent) => {
+    if (shouldIgnoreForTimer(e.target)) return
+
     if (e.code === "Space") {
       clearTimer()
       setHoldingReady(false)

@@ -5,21 +5,21 @@ import { SessionDisplay } from "~/components/session-display"
 import { SessionProvider, useSession } from "~/components/session-provider"
 import { TimerDisplay } from "~/components/timer-display"
 import { Spinner } from "~/components/ui/spinner"
+import { useScrambleHistory } from "~/hooks/useScrambleHistory"
 import { useTimerController } from "~/hooks/useTimerController"
 import { solveCollection } from "~/lib/db"
-import { useScramble } from "~/lib/scramble"
 
 const Home = () => {
   const { session } = useSession()
 
-  const scramble = useScramble("333")
+  const scrambleHistory = useScrambleHistory("333")
   const timer = useTimerController({
     onSolve: (solve) => {
-      scramble.refetch()
+      scrambleHistory.goToNext()
 
       solveCollection.insert({
         ...solve,
-        scramble: scramble.data?.toString() ?? "",
+        scramble: scrambleHistory.currentScramble ?? "",
         sessionId: session.data?.id ?? "",
         date: new Date(),
         id: crypto.randomUUID(),
@@ -27,19 +27,21 @@ const Home = () => {
     },
   })
 
+  if (!session.data) {
+    return (
+      <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background">
+        <Spinner className="size-8" />
+      </main>
+    )
+  }
+
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background">
-      {session.data && (
-        <>
-          <ScrambleDisplay
-            scramble={scramble}
-            onClick={() => scramble.refetch()}
-          />
-          <SessionDisplay />
-          <TimerDisplay {...timer} />
-        </>
-      )}
-      {!session.data && <Spinner className="size-8" />}
+    <main className="relative grid min-h-screen grid-cols-[calc(var(--spacing)*96)_1fr] items-center justify-center">
+      <SessionDisplay />
+      <div className="grid size-full grid-rows-[auto_1fr] items-center border-l text-center">
+        <ScrambleDisplay scrambleHistory={scrambleHistory} />
+        <TimerDisplay {...timer} />
+      </div>
     </main>
   )
 }

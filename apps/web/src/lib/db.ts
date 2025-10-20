@@ -49,4 +49,3 @@ export const sessionCollection = createCollection(
     utils: DexieUtils
   },
 )
-

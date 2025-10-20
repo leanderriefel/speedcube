@@ -8,6 +8,8 @@ import {
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 
+import { ThemeProvider } from "~/components/theme-provider"
+import { Toaster } from "~/components/ui/sonner"
 import appCss from "~/index.css?url"
 
 export const Route = createRootRouteWithContext()({
@@ -54,14 +56,17 @@ function RootDocument() {
       </head>
 
       <body>
-        <Outlet />
-        {import.meta.env.DEV ? (
-          <>
-            <TanStackRouterDevtools position="top-right" />
-            <ReactQueryDevtools buttonPosition="top-left" />
-          </>
-        ) : null}
-        <Scripts />
+        <ThemeProvider>
+          <Outlet />
+          {import.meta.env.DEV ? (
+            <>
+              <TanStackRouterDevtools position="bottom-right" />
+              <ReactQueryDevtools buttonPosition="bottom-left" />
+            </>
+          ) : null}
+          <Toaster position="bottom-center" />
+          <Scripts />
+        </ThemeProvider>
       </body>
     </html>
   )

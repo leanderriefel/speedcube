@@ -1,24 +1,44 @@
-import type { useScramble } from "~/lib/scramble"
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
-type ScrambleResult = ReturnType<typeof useScramble>
+import { Button } from "~/components/ui/button"
+import type { useScrambleHistory } from "~/hooks/useScrambleHistory"
+
+type ScrambleHistoryResult = ReturnType<typeof useScrambleHistory>
 
 type ScrambleDisplayProps = {
-  scramble: ScrambleResult
-  onClick: () => void
+  scrambleHistory: ScrambleHistoryResult
 }
 
-export const ScrambleDisplay = ({
-  scramble,
-  onClick,
-}: ScrambleDisplayProps) => (
-  <p
-    className="absolute top-4 mx-auto cursor-pointer px-4 text-center font-mono text-base sm:top-10 sm:px-10 sm:text-3xl"
-    onClick={onClick}
-  >
-    {scramble.isPending
-      ? "Generating scramble..."
-      : scramble.isError
-        ? "Error generating scramble"
-        : scramble.data?.toString()}
-  </p>
-)
+export const ScrambleDisplay = ({ scrambleHistory }: ScrambleDisplayProps) => {
+  const {
+    currentScramble,
+    isGenerating,
+    canGoPrevious,
+    goToPrevious,
+    goToNext,
+  } = scrambleHistory
+
+  return (
+    <div className="flex w-full items-center justify-center gap-4 border-b p-4 sm:p-8">
+      <Button
+        onClick={goToPrevious}
+        disabled={!canGoPrevious}
+        variant="ghost"
+        size="icon-sm"
+      >
+        <ChevronLeftIcon className="size-4" />
+      </Button>
+      <p className="text-center font-mono text-base text-balance sm:text-lg xl:text-xl 2xl:text-2xl">
+        {isGenerating ? "Generating scramble..." : currentScramble}
+      </p>
+      <Button
+        onClick={goToNext}
+        disabled={isGenerating}
+        variant="ghost"
+        size="icon-sm"
+      >
+        <ChevronRightIcon className="size-4" />
+      </Button>
+    </div>
+  )
+}
