@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { eq, useLiveQuery } from "@tanstack/react-db"
 import { useVirtualizer } from "@tanstack/react-virtual"
+import { ChevronDownIcon } from "lucide-react"
 
 import { useSession } from "~/components/session-provider"
+import { Button } from "~/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu"
 import { cn, formatTime } from "~/lib"
 import { average } from "~/lib/calc"
 import { sessionCollection, solveCollection } from "~/lib/db"
@@ -124,27 +132,40 @@ export const SessionDisplay = () => {
   }
 
   return (
-    <div className="size-full py-4 sm:py-8">
-      <h2 className="mx-4 mb-4 text-lg font-semibold sm:mx-8 sm:mb-8">
-        <input
-          ref={inputRef}
-          type="text"
-          value={editName}
-          onChange={(e) => setEditName(e.target.value)}
-          onFocus={handleStartEdit}
-          onBlur={handleSaveEdit}
-          onKeyDown={handleKeyDown}
-          maxLength={24}
-          enterKeyHint="done"
-          className={cn(
-            "cursor-text border-none bg-transparent p-0 font-semibold outline-none",
-            {
-              "cursor-text underline underline-offset-4": isEditing,
-            },
-          )}
-        />
-      </h2>
-      <div ref={tableContainerRef} className="max-h-full overflow-y-auto">
+    <div className="flex h-full min-h-0 flex-col self-stretch overflow-hidden pt-4 sm:pt-8">
+      <div className="mb-4 flex w-full items-center justify-between gap-x-4 px-4 sm:mb-8 sm:px-8">
+        <h2 className="text-lg font-semibold">
+          <input
+            ref={inputRef}
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onFocus={handleStartEdit}
+            onBlur={handleSaveEdit}
+            onKeyDown={handleKeyDown}
+            maxLength={24}
+            enterKeyHint="done"
+            className={cn(
+              "cursor-text border-none bg-transparent p-0 font-semibold outline-none",
+              {
+                "cursor-text underline underline-offset-4": isEditing,
+              },
+            )}
+          />
+        </h2>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <ChevronDownIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem>Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div ref={tableContainerRef} className="min-h-0 flex-1 overflow-y-auto">
         <table className="w-full table-fixed text-center text-sm">
           <thead>
             <tr

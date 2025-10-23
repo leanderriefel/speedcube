@@ -16,9 +16,9 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@types/node": "^22.18.10",
-    "tsdown": "^0.15.6",
+    "@types/node": "^22.18.12",
+    "tsdown": "^0.15.9",
     "turbo": "^2.5.8"
   },
-  "packageManager": "pnpm@10.18.2"
+  "packageManager": "pnpm@10.19.0"
 }

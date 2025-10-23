@@ -36,7 +36,7 @@ const Home = () => {
   }
 
   return (
-    <main className="relative grid min-h-screen grid-cols-[calc(var(--spacing)*96)_1fr] items-center justify-center">
+    <main className="relative grid h-dvh grid-cols-[calc(var(--spacing)*112)_1fr] items-center justify-center overflow-hidden">
       <SessionDisplay />
       <div className="grid size-full grid-rows-[auto_1fr] items-center border-l text-center">
         <ScrambleDisplay scrambleHistory={scrambleHistory} />

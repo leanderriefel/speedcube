@@ -55,7 +55,7 @@ function RootDocument() {
         <HeadContent />
       </head>
 
-      <body>
+      <body className="relative isolate">
         <ThemeProvider>
           <Outlet />
           {import.meta.env.DEV ? (
