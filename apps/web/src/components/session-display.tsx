@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { eq, useLiveQuery } from "@tanstack/react-db"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { ChevronDownIcon } from "lucide-react"
@@ -8,7 +8,9 @@ import { Button } from "~/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
 import { cn, formatTime } from "~/lib"
@@ -22,6 +24,8 @@ export const SessionDisplay = () => {
   const inputRef = useRef<HTMLInputElement>(null)
   const tableContainerRef = useRef<HTMLDivElement>(null)
 
+  const { setSessionId } = useSession()
+
   const solves = useLiveQuery(
     (q) =>
       q
@@ -29,6 +33,22 @@ export const SessionDisplay = () => {
         .where(({ solves }) => eq(solves.sessionId, session.data?.id))
         .orderBy(({ solves }) => solves.date, "desc"),
     [session.data?.id],
+  )
+
+  const newSession = useCallback(() => {
+    const id = crypto.randomUUID()
+    const name = `Session ${new Date().toLocaleDateString()}`
+    sessionCollection.insert({ id, name, date: new Date() })
+    setSessionId(id)
+    return { id, name }
+  }, [setSessionId])
+
+  const sessions = useLiveQuery(
+    (q) =>
+      q
+        .from({ sessions: sessionCollection })
+        .orderBy(({ sessions }) => sessions.date, "asc"),
+    [],
   )
 
   type CalcSolveResult = Parameters<typeof average>[0][number]
@@ -101,6 +121,12 @@ export const SessionDisplay = () => {
     }
   }, [isEditing])
 
+  useEffect(() => {
+    if (session.data?.name) {
+      setEditName(session.data.name)
+    }
+  }, [session.data?.id, session.data?.name])
+
   const handleStartEdit = () => {
     setIsEditing(true)
   }
@@ -160,7 +186,25 @@ export const SessionDisplay = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <DropdownMenuGroup>
+              {sessions.data?.map((session) => (
+                <DropdownMenuItem
+                  key={session.id}
+                  onClick={() => setSessionId(session.id)}
+                >
+                  {session.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => newSession()}>
+                Create new session
+              </DropdownMenuItem>
+              {sessions.data?.length > 1 && (
+                <DropdownMenuItem>Delete current session</DropdownMenuItem>
+              )}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

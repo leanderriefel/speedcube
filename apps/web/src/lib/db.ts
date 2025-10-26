@@ -19,6 +19,7 @@ export const solveSchema = z.object({
 export const sessionSchema = z.object({
   id: z.string(),
   name: z.string(),
+  date: z.date(),
 })
 
 export type Solve = z.infer<typeof solveSchema>

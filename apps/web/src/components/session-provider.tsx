@@ -72,6 +72,7 @@ const findSession = createIsomorphicFn().client(() => {
   sessionCollection.insert({
     id,
     name: `Session ${new Date().toLocaleDateString()}`,
+    date: new Date(),
   })
   return id
 })
