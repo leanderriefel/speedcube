@@ -1,5 +1,14 @@
+"use client"
+
 /* eslint-disable react/no-unknown-property */
-import React, { forwardRef, useLayoutEffect, useMemo, useRef } from "react"
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type CSSProperties,
+  type MutableRefObject,
+  type Ref,
+} from "react"
 import { Canvas, useFrame, useThree, type RootState } from "@react-three/fiber"
 import { Color, Mesh, ShaderMaterial, type IUniform } from "three"
 
@@ -86,58 +95,64 @@ void main() {
 
 interface BackgroundPlaneProps {
   uniforms: BackgroundUniforms
+  meshRef: MutableRefObject<Mesh | null>
 }
 
-const BackgroundPlane = forwardRef<Mesh, BackgroundPlaneProps>(
-  function BackgroundPlane({ uniforms }, ref) {
-    const { viewport } = useThree()
+const BackgroundPlane = ({ uniforms, meshRef }: BackgroundPlaneProps) => {
+  const { viewport } = useThree()
 
-    useLayoutEffect(() => {
-      const mesh = ref as React.MutableRefObject<Mesh | null>
-      if (mesh.current) {
-        mesh.current.scale.set(viewport.width, viewport.height, 1)
-      }
-    }, [ref, viewport])
+  useLayoutEffect(() => {
+    if (meshRef.current) {
+      meshRef.current.scale.set(viewport.width, viewport.height, 1)
+    }
+  }, [meshRef, viewport])
 
-    useFrame((_state: RootState, delta: number) => {
-      const mesh = ref as React.MutableRefObject<Mesh | null>
-      if (mesh.current) {
-        const material = mesh.current.material as ShaderMaterial & {
-          uniforms: BackgroundUniforms
-        }
-        material.uniforms.uTime.value += 0.1 * delta
-      }
-    })
+  useFrame((_state: RootState, delta: number) => {
+    const mesh = meshRef.current
+    if (!mesh) return
 
-    return (
-      <mesh ref={ref}>
-        <planeGeometry args={[1, 1, 1, 1]} />
-        <shaderMaterial
-          uniforms={uniforms}
-          vertexShader={vertexShader}
-          fragmentShader={fragmentShader}
-        />
-      </mesh>
-    )
-  },
-)
-BackgroundPlane.displayName = "BackgroundPlane"
+    const material = mesh.material as ShaderMaterial & {
+      uniforms: BackgroundUniforms
+    }
+    material.uniforms.uTime.value += 0.1 * delta
+  })
 
-export interface BackgroundProps {
+  return (
+    <mesh ref={meshRef}>
+      <planeGeometry args={[1, 1, 1, 1]} />
+      <shaderMaterial
+        uniforms={uniforms}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+      />
+    </mesh>
+  )
+}
+
+export type BackgroundProps = {
   speed?: number
   scale?: number
   color?: string
   noiseIntensity?: number
   rotation?: number
+  className?: string
+  style?: CSSProperties
+} & {
+  ref?: Ref<HTMLCanvasElement>
 }
 
-const Background: React.FC<BackgroundProps> = ({
-  speed = 5,
-  scale = 1,
-  color = "#7B7481",
-  noiseIntensity = 1.5,
-  rotation = 0,
-}) => {
+const Background = (props: BackgroundProps) => {
+  const {
+    speed = 5,
+    scale = 1,
+    color = "#7B7481",
+    noiseIntensity = 1.5,
+    rotation = 0,
+    className,
+    style,
+    ref: canvasRef,
+  } = props
+
   const meshRef = useRef<Mesh>(null)
 
   const uniforms = useMemo<BackgroundUniforms>(
@@ -154,13 +169,22 @@ const Background: React.FC<BackgroundProps> = ({
 
   return (
     <Canvas
+      ref={canvasRef}
+      className={className}
       dpr={[1, 2]}
       frameloop="always"
-      style={{ position: "absolute", inset: 0, zIndex: -1, opacity: 0.05 }}
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: -1,
+        ...style,
+      }}
     >
-      <BackgroundPlane ref={meshRef} uniforms={uniforms} />
+      <BackgroundPlane meshRef={meshRef} uniforms={uniforms} />
     </Canvas>
   )
 }
+
+Background.displayName = "Background"
 
 export default Background

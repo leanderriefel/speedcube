@@ -1,7 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { randomScrambleForEvent } from "cubing/scramble"
 
 import type { Event } from "~/lib/scramble"
+
+type RandomScrambleForEvent = typeof import("cubing/scramble") extends {
+  randomScrambleForEvent: infer T
+}
+  ? T
+  : never
+
+let randomScrambleLoader: Promise<RandomScrambleForEvent> | null = null
+
+const loadRandomScrambleForEvent = async () => {
+  randomScrambleLoader ??= import("cubing/scramble").then(
+    (mod) => mod.randomScrambleForEvent,
+  )
+
+  return randomScrambleLoader
+}
 
 export const useScrambleHistory = (event: Event) => {
   const [history, setHistory] = useState<string[]>([])
@@ -12,6 +27,7 @@ export const useScrambleHistory = (event: Event) => {
   const generateScramble = useCallback(async () => {
     setIsGenerating(true)
     try {
+      const randomScrambleForEvent = await loadRandomScrambleForEvent()
       const scramble = await randomScrambleForEvent(event)
       const scrambleString = scramble.toString()
 

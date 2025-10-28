@@ -50,7 +50,7 @@ export const Route = createRootRouteWithContext()({
 
 function RootDocument() {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
