@@ -76,6 +76,18 @@ export const SessionDisplay = () => {
     }
   }
 
+  const deleteSession = () => {
+    const sessionId = session.data?.id
+    if (!sessionId) return
+    if (sessions.data?.length === 1) return
+
+    const nextSessionId = sessions.data.find((s) => s.id !== sessionId)?.id
+    if (!nextSessionId) return
+
+    sessionCollection.delete(sessionId)
+    setSessionId(nextSessionId)
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col self-stretch overflow-hidden pt-4 sm:pt-8">
       <div className="mb-4 flex w-full items-center justify-between gap-x-4 px-4 sm:mb-8 sm:px-8">
@@ -121,7 +133,12 @@ export const SessionDisplay = () => {
                 Create new session
               </DropdownMenuItem>
               {sessions.data?.length > 1 && (
-                <DropdownMenuItem>Delete current session</DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => deleteSession()}
+                >
+                  Delete current session
+                </DropdownMenuItem>
               )}
             </DropdownMenuGroup>
           </DropdownMenuContent>
