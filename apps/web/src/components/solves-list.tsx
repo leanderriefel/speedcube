@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react"
+import { useMemo, useRef, useState } from "react"
 import { eq, useLiveQuery } from "@tanstack/react-db"
 import { useVirtualizer } from "@tanstack/react-virtual"
 
@@ -6,6 +6,7 @@ import { useSession } from "~/components/session-provider"
 import { cn, formatTime } from "~/lib"
 import { average } from "~/lib/calc"
 import { solveCollection } from "~/lib/db"
+import { Checkbox } from "./ui/checkbox"
 
 export const SolvesList = () => {
   const { session } = useSession()
@@ -30,6 +31,8 @@ export const SolvesList = () => {
         : { time: undefined, dnf: true as const },
     )
   }, [solves.data])
+
+  const [selection, setSelection] = useState<Set<string>>(new Set())
 
   const rollingAverages = useMemo(() => {
     const compute = (windowSize: number) => {
@@ -117,10 +120,38 @@ export const SolvesList = () => {
             return (
               <tr
                 key={solve.id}
-                className="border-b border-border *:px-6 *:py-2 *:whitespace-nowrap"
+                className={cn(
+                  "cursor-pointer border-b border-border *:px-6 *:py-2 *:whitespace-nowrap *:select-none",
+                  {
+                    "bg-secondary": selection.has(solve.id),
+                  },
+                )}
                 style={{ height: `${virtualRow.size}px` }}
+                onClick={() =>
+                  setSelection((prev) => {
+                    const newSelection = new Set(prev)
+                    if (newSelection.has(solve.id)) {
+                      newSelection.delete(solve.id)
+                    } else {
+                      newSelection.add(solve.id)
+                    }
+                    return newSelection
+                  })
+                }
               >
-                <td className="text-muted-foreground">{displayIndex}</td>
+                <td
+                  className="flex size-full items-center justify-center text-muted-foreground"
+                  style={{ height: `${virtualRow.size}px` }}
+                >
+                  {selection.size > 0 ? (
+                    <Checkbox
+                      className="size-5 rounded-[8px]"
+                      checked={selection.has(solve.id)}
+                    />
+                  ) : (
+                    displayIndex
+                  )}
+                </td>
                 <td className="font-mono">
                   {typeof solve.time === "undefined"
                     ? "DNF"
