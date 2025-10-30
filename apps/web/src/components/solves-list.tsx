@@ -7,6 +7,12 @@ import { cn, formatTime } from "~/lib"
 import { average } from "~/lib/calc"
 import { solveCollection } from "~/lib/db"
 import { Checkbox } from "./ui/checkbox"
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "./ui/context-menu"
 
 export const SolvesList = () => {
   const { session } = useSession()
@@ -81,10 +87,10 @@ export const SolvesList = () => {
   const totalSize = rowVirtualizer.getTotalSize()
   const solvesData = solves.data ?? []
 
-  const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0
+  const paddingTop = virtualRows.length > 0 ? (virtualRows[0]?.start ?? 0) : 0
   const paddingBottom =
     virtualRows.length > 0
-      ? totalSize - virtualRows[virtualRows.length - 1].end
+      ? totalSize - (virtualRows[virtualRows.length - 1]?.end ?? 0)
       : 0
 
   return (
@@ -96,8 +102,33 @@ export const SolvesList = () => {
               "*:sticky *:top-0 *:z-10 *:bg-background *:px-6 *:py-2 *:font-medium",
               "*:after:absolute *:after:right-0 *:after:bottom-0 *:after:left-0 *:after:h-px *:after:bg-border",
             )}
+            style={{
+              height: `${virtualRows[0]?.size ?? 42}px`,
+            }}
           >
-            <th className="text-muted-foreground">#</th>
+            <th className="text-muted-foreground">
+              {selection.size > 0 ? (
+                <Checkbox
+                  className="size-5 rounded-[8px] border-2! border-border transition-all duration-100"
+                  checked={selection.size === solvesData.length}
+                  onClick={() =>
+                    setSelection((prev) => {
+                      const newSelection = new Set(prev)
+                      if (newSelection.size === solvesData.length) {
+                        newSelection.clear()
+                      } else {
+                        solvesData.forEach((solve) => {
+                          newSelection.add(solve.id)
+                        })
+                      }
+                      return newSelection
+                    })
+                  }
+                />
+              ) : (
+                "#"
+              )}
+            </th>
             <th>Time</th>
             <th>ao5</th>
             <th>ao12</th>
@@ -118,50 +149,83 @@ export const SolvesList = () => {
             const displayIndex = solvesData.length - solveIndex
 
             return (
-              <tr
-                key={solve.id}
-                className={cn(
-                  "cursor-pointer border-b border-border *:px-6 *:py-2 *:whitespace-nowrap *:select-none",
-                  {
-                    "bg-secondary": selection.has(solve.id),
-                  },
-                )}
-                style={{ height: `${virtualRow.size}px` }}
-                onClick={() =>
-                  setSelection((prev) => {
-                    const newSelection = new Set(prev)
-                    if (newSelection.has(solve.id)) {
-                      newSelection.delete(solve.id)
-                    } else {
-                      newSelection.add(solve.id)
+              <ContextMenu key={solve.id}>
+                <ContextMenuTrigger asChild>
+                  <tr
+                    className={cn(
+                      "cursor-pointer border-b border-border *:px-6 *:py-2 *:whitespace-nowrap *:select-none",
+                      {
+                        "bg-secondary": selection.has(solve.id),
+                      },
+                    )}
+                    style={{ height: `${virtualRow.size}px` }}
+                    onClick={() =>
+                      setSelection((prev) => {
+                        const newSelection = new Set(prev)
+                        if (newSelection.has(solve.id)) {
+                          newSelection.delete(solve.id)
+                        } else {
+                          newSelection.add(solve.id)
+                        }
+                        return newSelection
+                      })
                     }
-                    return newSelection
-                  })
-                }
-              >
-                <td
-                  className="flex size-full items-center justify-center text-muted-foreground"
-                  style={{ height: `${virtualRow.size}px` }}
-                >
-                  {selection.size > 0 ? (
-                    <Checkbox
-                      className="size-5 rounded-[8px]"
-                      checked={selection.has(solve.id)}
-                    />
-                  ) : (
-                    displayIndex
-                  )}
-                </td>
-                <td className="font-mono">
-                  {typeof solve.time === "undefined"
-                    ? "DNF"
-                    : formatTime(solve.time)}
-                </td>
-                <td className="font-mono">{rollingAverages.ao5[solveIndex]}</td>
-                <td className="font-mono">
-                  {rollingAverages.ao12[solveIndex]}
-                </td>
-              </tr>
+                  >
+                    <td
+                      className="flex size-full items-center justify-center text-muted-foreground"
+                      style={{ height: `${virtualRow.size}px` }}
+                    >
+                      {selection.size > 0 ? (
+                        <Checkbox
+                          className="size-5 rounded-[8px] border-2! border-border transition-all duration-100"
+                          checked={selection.has(solve.id)}
+                        />
+                      ) : (
+                        displayIndex
+                      )}
+                    </td>
+                    <td className="font-mono">
+                      {typeof solve.time === "undefined"
+                        ? "DNF"
+                        : formatTime(solve.time)}
+                    </td>
+                    <td className="font-mono">
+                      {rollingAverages.ao5[solveIndex]}
+                    </td>
+                    <td className="font-mono">
+                      {rollingAverages.ao12[solveIndex]}
+                    </td>
+                  </tr>
+                </ContextMenuTrigger>
+                <ContextMenuContent>
+                  <ContextMenuItem
+                    onClick={() =>
+                      navigator.clipboard.writeText(
+                        typeof solve.time === "number"
+                          ? formatTime(solve.time)
+                          : "DNF",
+                      )
+                    }
+                  >
+                    Copy time
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onClick={() =>
+                      navigator.clipboard.writeText(
+                        `Time: ${typeof solve.time === "number" ? formatTime(solve.time) : "DNF"}; Scramble: ${solve.scramble}; Date: ${solve.date.toISOString()}; Event: ${solve.event}`,
+                      )
+                    }
+                  >
+                    Copy solve
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onClick={() => solveCollection.delete(solve.id)}
+                    variant="destructive"
+                  >
+                    Delete solve
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             )
           })}
           {paddingBottom > 0 ? (

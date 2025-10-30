@@ -19,18 +19,31 @@ const shouldIgnoreForTimer = (target: EventTarget | null): boolean => {
   if (target.isContentEditable || target.closest("[contenteditable]") !== null)
     return true
 
-  const editable = target.closest("input, textarea, select")
-  if (!editable) return false
+  // Check if any dropdown menu is open
+  if (
+    document.querySelector(
+      "[data-slot='dropdown-menu-content'][data-state='open']",
+    ) !== null
+  )
+    return true
 
-  if (editable instanceof HTMLInputElement) {
-    const { type, readOnly, disabled } = editable
-    if (type === "button" || type === "submit" || type === "reset") return false
-    return !(readOnly || disabled)
+  // Check if any dialog is open
+  if (
+    document.querySelector(
+      "[data-slot='dialog-content'][data-state='open']",
+    ) !== null
+  )
+    return true
+
+  // Only handle timer if focus is on body/document (not on any specific element)
+  const activeElement = document.activeElement
+  if (
+    activeElement &&
+    activeElement !== document.body &&
+    activeElement !== document.documentElement
+  ) {
+    return true
   }
-
-  if (editable instanceof HTMLTextAreaElement) return !editable.readOnly
-
-  if (editable instanceof HTMLSelectElement) return !editable.disabled
 
   return false
 }
