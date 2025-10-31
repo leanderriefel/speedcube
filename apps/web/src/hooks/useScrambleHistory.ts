@@ -23,6 +23,16 @@ export const useScrambleHistory = (event: Event) => {
   const [currentIndex, setCurrentIndex] = useState(-1)
   const [isGenerating, setIsGenerating] = useState(false)
   const isInitialized = useRef(false)
+  const previousEventRef = useRef<Event>(event)
+
+  useEffect(() => {
+    if (previousEventRef.current !== event) {
+      setHistory([])
+      setCurrentIndex(-1)
+      isInitialized.current = false
+      previousEventRef.current = event
+    }
+  }, [event])
 
   const generateScramble = useCallback(async () => {
     setIsGenerating(true)

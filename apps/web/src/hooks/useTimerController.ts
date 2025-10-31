@@ -9,6 +9,7 @@ import {
 
 import { formatTime } from "~/lib"
 import type { Solve } from "~/lib/db"
+import type { Event } from "~/lib/scramble"
 
 const shouldIgnoreForTimer = (target: EventTarget | null): boolean => {
   if (!(target instanceof HTMLElement)) return false
@@ -49,6 +50,7 @@ const shouldIgnoreForTimer = (target: EventTarget | null): boolean => {
 }
 
 type UseTimerControllerOptions = {
+  event: Event
   onSolve: (
     solve: Omit<Solve, "id" | "scramble" | "sessionId" | "date">,
   ) => void
@@ -61,6 +63,7 @@ export type UseTimerControllerResult = {
 }
 
 export const useTimerController = ({
+  event,
   onSolve,
 }: UseTimerControllerOptions): UseTimerControllerResult => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -109,10 +112,10 @@ export const useTimerController = ({
       render()
       onSolve({
         time: dnf ? undefined : timerMilliseconds.current,
-        event: "333",
+        event,
       })
     },
-    [render, onSolve],
+    [render, onSolve, event],
   )
 
   const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
@@ -165,3 +168,4 @@ export const useTimerController = ({
     startReady,
   }
 }
+

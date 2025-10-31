@@ -17,6 +17,24 @@ export const events = [
 
 export type Event = (typeof events)[number]
 
+export const eventLabels: Record<Event, string> = {
+  "333": "3x3",
+  "333bf": "3x3 Blindfolded",
+  "333fm": "3x3 Fewest Moves",
+  "222": "2x2",
+  "444": "4x4",
+  "777": "7x7",
+  "sq1": "Square-1",
+  "minx": "Megaminx",
+  "clock": "Clock",
+  "fto": "Face-Turning Octahedron",
+  "master_tetraminx": "Master Tetraminx",
+}
+
+export const getEventLabel = (event: Event): string => {
+  return eventLabels[event] ?? event
+}
+
 export const useScramble = (event: Event) => {
   return useQuery({
     queryFn: async () => await randomScrambleForEvent(event),

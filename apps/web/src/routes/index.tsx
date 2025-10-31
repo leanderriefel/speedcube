@@ -10,6 +10,7 @@ import { TimerDisplay } from "~/components/timer-display"
 import { Button } from "~/components/ui/button"
 import { Sheet, SheetContent } from "~/components/ui/sheet"
 import { Spinner } from "~/components/ui/spinner"
+import { useEvent } from "~/hooks/useEvent"
 import { useScrambleHistory } from "~/hooks/useScrambleHistory"
 import { useTimerController } from "~/hooks/useTimerController"
 import { cn } from "~/lib"
@@ -34,8 +35,10 @@ const Home = () => {
     return () => mediaQuery.removeEventListener("change", handleChange)
   }, [])
 
-  const scrambleHistory = useScrambleHistory("333")
+  const { event } = useEvent()
+  const scrambleHistory = useScrambleHistory(event)
   const timer = useTimerController({
+    event,
     onSolve: (solve) => {
       scrambleHistory.goToNext()
 
@@ -163,3 +166,4 @@ export const Route = createFileRoute("/")({
     </div>
   ),
 })
+
