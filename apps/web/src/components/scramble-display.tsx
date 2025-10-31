@@ -19,7 +19,7 @@ export const ScrambleDisplay = ({ scrambleHistory }: ScrambleDisplayProps) => {
   } = scrambleHistory
 
   return (
-    <div className="flex w-full items-center justify-center gap-4 border-b p-4 sm:p-8">
+    <div className="flex w-full items-center justify-center gap-4 border-b px-24 py-4 lg:py-8">
       <Button
         onClick={goToPrevious}
         disabled={!canGoPrevious}

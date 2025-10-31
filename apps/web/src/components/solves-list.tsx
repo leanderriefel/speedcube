@@ -1,11 +1,13 @@
 import { useMemo, useRef, useState } from "react"
 import { eq, useLiveQuery } from "@tanstack/react-db"
 import { useVirtualizer } from "@tanstack/react-virtual"
+import { MoreVerticalIcon } from "lucide-react"
 
 import { useSession } from "~/components/session-provider"
 import { cn, formatTime } from "~/lib"
 import { average } from "~/lib/calc"
 import { solveCollection } from "~/lib/db"
+import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import {
   ContextMenu,
@@ -13,6 +15,62 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "./ui/context-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
+
+const DeleteConfirmationDialog = ({
+  open,
+  onOpenChange,
+  count,
+  onConfirm,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  count: number
+  onConfirm: () => void
+}) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete solves</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete {count} solves? This action cannot
+            be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onConfirm()
+              onOpenChange(false)
+            }}
+          >
+            Confirm
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 export const SolvesList = () => {
   const { session } = useSession()
@@ -37,8 +95,6 @@ export const SolvesList = () => {
         : { time: undefined, dnf: true as const },
     )
   }, [solves.data])
-
-  const [selection, setSelection] = useState<Set<string>>(new Set())
 
   const rollingAverages = useMemo(() => {
     const compute = (windowSize: number) => {
@@ -85,7 +141,7 @@ export const SolvesList = () => {
 
   const virtualRows = rowVirtualizer.getVirtualItems()
   const totalSize = rowVirtualizer.getTotalSize()
-  const solvesData = solves.data ?? []
+  const solvesData = useMemo(() => solves.data ?? [], [solves.data])
 
   const paddingTop = virtualRows.length > 0 ? (virtualRows[0]?.start ?? 0) : 0
   const paddingBottom =
@@ -93,51 +149,144 @@ export const SolvesList = () => {
       ? totalSize - (virtualRows[virtualRows.length - 1]?.end ?? 0)
       : 0
 
+  const [selection, setSelection] = useState<Set<string>>(new Set())
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+
+  const selectedSolves = useMemo(() => {
+    return solvesData.filter((solve) => selection.has(solve.id))
+  }, [solvesData, selection])
+
+  const bulkActions = {
+    copyTimes: () => {
+      navigator.clipboard.writeText(
+        selectedSolves
+          .map((s) => (typeof s.time === "number" ? formatTime(s.time) : "DNF"))
+          .join("\n"),
+      )
+      setSelection(new Set())
+    },
+    copySolves: () => {
+      navigator.clipboard.writeText(
+        selectedSolves
+          .map(
+            (s) =>
+              `Time: ${typeof s.time === "number" ? formatTime(s.time) : "DNF"}; Scramble: ${s.scramble}; Date: ${s.date.toISOString()}; Event: ${s.event}`,
+          )
+          .join("\n"),
+      )
+      setSelection(new Set())
+    },
+    delete: () => {
+      selectedSolves.forEach((s) => solveCollection.delete(s.id))
+      setSelection(new Set())
+    },
+  }
+
+  const handleDelete = () => {
+    if (selection.size > 1) {
+      setConfirmDeleteOpen(true)
+    } else {
+      bulkActions.delete()
+    }
+  }
+
   return (
     <div ref={tableContainerRef} className="min-h-0 flex-1 overflow-y-auto">
-      <table className="w-full table-fixed text-center text-sm">
+      <table className="w-full text-center text-sm">
         <thead>
           <tr
             className={cn(
-              "*:sticky *:top-0 *:z-10 *:bg-background *:px-6 *:py-2 *:font-medium",
+              "*:sticky *:top-0 *:z-10 *:bg-background *:py-2 *:font-medium",
               "*:after:absolute *:after:right-0 *:after:bottom-0 *:after:left-0 *:after:h-px *:after:bg-border",
             )}
             style={{
               height: `${virtualRows[0]?.size ?? 42}px`,
             }}
           >
-            <th className="text-muted-foreground">
-              {selection.size > 0 ? (
+            <th
+              className="p-2"
+              style={{ width: `${virtualRows[0]?.size ?? 42}px` }}
+            >
+              <div
+                className="flex size-full cursor-pointer items-center justify-center"
+                onClick={() => {
+                  setSelection((prev) => {
+                    const newSelection = new Set(prev)
+                    if (newSelection.size === solvesData.length) {
+                      newSelection.clear()
+                    } else {
+                      solvesData.forEach((solve) => {
+                        newSelection.add(solve.id)
+                      })
+                    }
+                    return newSelection
+                  })
+                }}
+              >
                 <Checkbox
-                  className="size-5 rounded-[8px] border-2! border-border transition-all duration-100"
-                  checked={selection.size === solvesData.length}
-                  onClick={() =>
-                    setSelection((prev) => {
-                      const newSelection = new Set(prev)
-                      if (newSelection.size === solvesData.length) {
-                        newSelection.clear()
-                      } else {
-                        solvesData.forEach((solve) => {
-                          newSelection.add(solve.id)
-                        })
-                      }
-                      return newSelection
-                    })
+                  className="pointer-events-none size-5 rounded-[8px] border-2! border-border transition-all duration-100"
+                  checked={selection.size > 0}
+                  variant={
+                    selection.size > 0 && selection.size < solvesData.length
+                      ? "indeterminate"
+                      : "default"
                   }
                 />
-              ) : (
-                "#"
+              </div>
+            </th>
+            <th
+              className="p-2 text-muted-foreground"
+              style={{ width: `${virtualRows[0]?.size ?? 42}px` }}
+            >
+              #
+            </th>
+            <th className="px-6 text-center">Time</th>
+            <th className="px-6 text-center">ao5</th>
+            <th className="px-6 text-center">ao12</th>
+            <th
+              className="p-2"
+              style={{ width: `${virtualRows[0]?.size ?? 42}px` }}
+            >
+              {selection.size > 0 && (
+                <div className="flex size-full items-center justify-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="size-6 rounded-[8px]"
+                      >
+                        <MoreVerticalIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel className="text-xs text-muted-foreground">
+                        {selection.size} solves selected
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={bulkActions.copyTimes}>
+                        Copy times
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={bulkActions.copySolves}>
+                        Copy solves
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={handleDelete}
+                        variant="destructive"
+                      >
+                        Delete solves
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               )}
             </th>
-            <th>Time</th>
-            <th>ao5</th>
-            <th>ao12</th>
           </tr>
         </thead>
         <tbody>
           {paddingTop > 0 ? (
             <tr style={{ height: `${paddingTop}px` }}>
-              <td colSpan={4} />
+              <td colSpan={6} />
             </tr>
           ) : null}
           {virtualRows.map((virtualRow) => {
@@ -153,47 +302,100 @@ export const SolvesList = () => {
                 <ContextMenuTrigger asChild>
                   <tr
                     className={cn(
-                      "cursor-pointer border-b border-border *:px-6 *:py-2 *:whitespace-nowrap *:select-none",
+                      "cursor-pointer border-b border-border *:whitespace-nowrap *:select-none",
                       {
-                        "bg-secondary": selection.has(solve.id),
+                        "bg-secondary/50": selection.has(solve.id),
                       },
                     )}
                     style={{ height: `${virtualRow.size}px` }}
-                    onClick={() =>
-                      setSelection((prev) => {
-                        const newSelection = new Set(prev)
-                        if (newSelection.has(solve.id)) {
-                          newSelection.delete(solve.id)
-                        } else {
-                          newSelection.add(solve.id)
-                        }
-                        return newSelection
-                      })
-                    }
                   >
                     <td
-                      className="flex size-full items-center justify-center text-muted-foreground"
-                      style={{ height: `${virtualRow.size}px` }}
+                      className="p-2"
+                      style={{ width: `${virtualRow.size}px` }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+
+                        setSelection((prev) => {
+                          const newSelection = new Set(prev)
+                          if (newSelection.has(solve.id)) {
+                            newSelection.delete(solve.id)
+                          } else {
+                            newSelection.add(solve.id)
+                          }
+                          return newSelection
+                        })
+                      }}
                     >
-                      {selection.size > 0 ? (
+                      <div className="flex size-full cursor-pointer items-center justify-center">
                         <Checkbox
-                          className="size-5 rounded-[8px] border-2! border-border transition-all duration-100"
+                          className="pointer-events-none size-5 rounded-[8px] border-2! border-border transition-all duration-100"
                           checked={selection.has(solve.id)}
                         />
-                      ) : (
-                        displayIndex
-                      )}
+                      </div>
                     </td>
-                    <td className="font-mono">
+                    <td
+                      className="p-2 text-center text-muted-foreground"
+                      style={{ width: `${virtualRow.size}px` }}
+                    >
+                      {displayIndex}
+                    </td>
+                    <td className="px-6 text-center font-mono">
                       {typeof solve.time === "undefined"
                         ? "DNF"
                         : formatTime(solve.time)}
                     </td>
-                    <td className="font-mono">
+                    <td className="px-6 text-center font-mono">
                       {rollingAverages.ao5[solveIndex]}
                     </td>
-                    <td className="font-mono">
+                    <td className="px-6 text-center font-mono">
                       {rollingAverages.ao12[solveIndex]}
+                    </td>
+                    <td
+                      className="p-2"
+                      style={{ width: `${virtualRow.size}px` }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex size-full items-center justify-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="size-6 rounded-[8px]"
+                            >
+                              <MoreVerticalIcon />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                navigator.clipboard.writeText(
+                                  typeof solve.time === "number"
+                                    ? formatTime(solve.time)
+                                    : "DNF",
+                                )
+                              }
+                            >
+                              Copy time
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                navigator.clipboard.writeText(
+                                  `Time: ${typeof solve.time === "number" ? formatTime(solve.time) : "DNF"}; Scramble: ${solve.scramble}; Date: ${solve.date.toISOString()}; Event: ${solve.event}`,
+                                )
+                              }
+                            >
+                              Copy solve
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => solveCollection.delete(solve.id)}
+                              variant="destructive"
+                            >
+                              Delete solve
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </td>
                   </tr>
                 </ContextMenuTrigger>
@@ -230,11 +432,17 @@ export const SolvesList = () => {
           })}
           {paddingBottom > 0 ? (
             <tr style={{ height: `${paddingBottom}px` }}>
-              <td colSpan={4} />
+              <td colSpan={6} />
             </tr>
           ) : null}
         </tbody>
       </table>
+      <DeleteConfirmationDialog
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+        count={selection.size}
+        onConfirm={bulkActions.delete}
+      />
     </div>
   )
 }

@@ -117,7 +117,7 @@ export const SessionDisplay = ({ isOpen, onToggle }: SessionDisplayProps) => {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col self-stretch overflow-hidden pt-4 sm:pt-8">
+    <div className="flex size-full min-h-0 flex-col self-stretch overflow-hidden pt-4 sm:pt-8">
       <div className="mb-4 flex w-full items-center justify-between gap-x-4 px-4 sm:mb-8 sm:px-8">
         <h2 className="text-lg font-semibold">
           <input
