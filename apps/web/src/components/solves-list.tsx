@@ -5,7 +5,7 @@ import { CheckIcon, CopyIcon, MoreVerticalIcon } from "lucide-react"
 
 import { useSession } from "~/components/session-provider"
 import { cn, formatTime } from "~/lib"
-import { average } from "~/lib/calc"
+import { average, mean } from "~/lib/calc"
 import { sessionCollection, solveCollection, type Solve } from "~/lib/db"
 import { getEventLabel } from "~/lib/scramble"
 import { Button } from "./ui/button"
@@ -243,6 +243,31 @@ export const SolvesList = () => {
     )
   }, [solves.data])
 
+  const currentStats = useMemo(() => {
+    const formatResult = (result: ReturnType<typeof average>) => {
+      return result.dnf || typeof result.time === "undefined"
+        ? "DNF"
+        : formatTime(result.time)
+    }
+
+    const mo3 =
+      solveResults.length >= 3
+        ? formatResult(mean(solveResults.slice(0, 3)))
+        : "—"
+    const ao5 =
+      solveResults.length >= 5
+        ? formatResult(average(solveResults.slice(0, 5)))
+        : "—"
+    const ao12 =
+      solveResults.length >= 12
+        ? formatResult(average(solveResults.slice(0, 12)))
+        : "—"
+    const aoAll =
+      solveResults.length > 0 ? formatResult(average([...solveResults])) : "—"
+
+    return { mo3, ao5, ao12, aoAll, totalCount: solveResults.length }
+  }, [solveResults])
+
   const rollingAverages = useMemo(() => {
     const compute = (windowSize: number) => {
       const formatted = new Array<string>(solveResults.length).fill("—")
@@ -366,227 +391,257 @@ export const SolvesList = () => {
           </p>
         </div>
       ) : (
-        <table className="w-full text-center text-sm">
-          <thead>
-            <tr
-              className={cn(
-                "*:sticky *:top-0 *:z-10 *:bg-background *:py-2 *:font-medium",
-                "*:after:absolute *:after:right-0 *:after:bottom-0 *:after:left-0 *:after:h-px *:after:bg-border",
-              )}
-              style={{
-                height: `${virtualRows[0]?.size ?? 42}px`,
-              }}
-            >
-              <th
-                className="p-2"
-                style={{ width: `${virtualRows[0]?.size ?? 42}px` }}
-              >
-                <div
-                  className="flex size-full cursor-pointer items-center justify-center"
-                  onClick={() => {
-                    setSelection((prev) => {
-                      const newSelection = new Set(prev)
-                      if (newSelection.size === solvesData.length) {
-                        newSelection.clear()
-                      } else {
-                        solvesData.forEach((solve) => {
-                          newSelection.add(solve.id)
-                        })
-                      }
-                      return newSelection
-                    })
-                  }}
-                >
-                  <Checkbox
-                    className="pointer-events-none size-5 rounded-[8px] border-2! border-border transition-all duration-100"
-                    checked={selection.size > 0}
-                    variant={
-                      selection.size > 0 && selection.size < solvesData.length
-                        ? "indeterminate"
-                        : "default"
-                    }
-                  />
-                </div>
-              </th>
-              <th
-                className="p-2 text-muted-foreground"
-                style={{ width: `${virtualRows[0]?.size ?? 42}px` }}
-              >
-                #
-              </th>
-              <th className="px-6 text-center">Time</th>
-              <th className="px-6 text-center">ao5</th>
-              <th className="px-6 text-center">ao12</th>
-              <th
-                className="p-2"
-                style={{ width: `${virtualRows[0]?.size ?? 42}px` }}
-              >
-                {selection.size > 0 && (
-                  <div className="flex size-full items-center justify-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="size-6 rounded-[8px]"
-                        >
-                          <MoreVerticalIcon />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel className="text-xs text-muted-foreground">
-                          {selection.size} solves selected
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={bulkActions.copyTimes}>
-                          Copy times
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={bulkActions.copySolves}>
-                          Copy solves
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={handleDelete}
-                          variant="destructive"
-                        >
-                          Delete solves
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+        <>
+          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background px-6 py-2">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs text-muted-foreground">mo3</span>
+              <span className="font-mono text-sm font-semibold">
+                {currentStats.mo3}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs text-muted-foreground">ao5</span>
+              <span className="font-mono text-sm font-semibold">
+                {currentStats.ao5}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs text-muted-foreground">ao12</span>
+              <span className="font-mono text-sm font-semibold">
+                {currentStats.ao12}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs text-muted-foreground">
+                ao{currentStats.totalCount}
+              </span>
+              <span className="font-mono text-sm font-semibold">
+                {currentStats.aoAll}
+              </span>
+            </div>
+          </div>
+          <table className="w-full text-center text-sm">
+            <thead>
+              <tr
+                className={cn(
+                  "*:sticky *:top-[36px] *:z-10 *:bg-background *:py-2 *:font-medium",
+                  "*:after:absolute *:after:right-0 *:after:bottom-0 *:after:left-0 *:after:h-px *:after:bg-border",
                 )}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {paddingTop > 0 ? (
-              <tr style={{ height: `${paddingTop}px` }}>
-                <td colSpan={6} />
-              </tr>
-            ) : null}
-            {virtualRows.map((virtualRow) => {
-              const solveIndex = virtualRow.index
-              const solve = solvesData[solveIndex]
-
-              if (!solve) return null
-
-              const displayIndex = solvesData.length - solveIndex
-
-              return (
-                <ContextMenu key={solve.id}>
-                  <ContextMenuTrigger asChild>
-                    <tr
-                      className={cn(
-                        "cursor-pointer border-b border-border *:whitespace-nowrap *:select-none",
-                        {
-                          "bg-secondary/50": selection.has(solve.id),
-                        },
-                      )}
-                      style={{ height: `${virtualRow.size}px` }}
-                    >
-                      <td
-                        className="p-2"
-                        style={{ width: `${virtualRow.size}px` }}
-                        onClick={(e) => {
-                          e.stopPropagation()
-
-                          setSelection((prev) => {
-                            const newSelection = new Set(prev)
-                            if (newSelection.has(solve.id)) {
-                              newSelection.delete(solve.id)
-                            } else {
-                              newSelection.add(solve.id)
-                            }
-                            return newSelection
+                style={{
+                  height: `${virtualRows[0]?.size ?? 42}px`,
+                }}
+              >
+                <th
+                  className="p-2"
+                  style={{ width: `${virtualRows[0]?.size ?? 42}px` }}
+                >
+                  <div
+                    className="flex size-full cursor-pointer items-center justify-center"
+                    onClick={() => {
+                      setSelection((prev) => {
+                        const newSelection = new Set(prev)
+                        if (newSelection.size === solvesData.length) {
+                          newSelection.clear()
+                        } else {
+                          solvesData.forEach((solve) => {
+                            newSelection.add(solve.id)
                           })
-                        }}
-                      >
-                        <div className="flex size-full cursor-pointer items-center justify-center">
-                          <Checkbox
-                            className="pointer-events-none size-5 rounded-[8px] border-2! border-border transition-all duration-100"
-                            checked={selection.has(solve.id)}
-                          />
-                        </div>
-                      </td>
-                      <td
-                        className="p-2 text-center text-muted-foreground"
-                        style={{ width: `${virtualRow.size}px` }}
-                      >
-                        {displayIndex}
-                      </td>
-                      <td className="px-6 text-center font-mono">
-                        {typeof solve.time === "undefined"
-                          ? "DNF"
-                          : formatTime(solve.time)}
-                      </td>
-                      <td className="px-6 text-center font-mono">
-                        {rollingAverages.ao5[solveIndex]}
-                      </td>
-                      <td className="px-6 text-center font-mono">
-                        {rollingAverages.ao12[solveIndex]}
-                      </td>
-                      <td
-                        className="p-2"
-                        style={{ width: `${virtualRow.size}px` }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="flex size-full items-center justify-center">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                className="size-6 rounded-[8px]"
-                              >
-                                <MoreVerticalIcon />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            {/* eslint-disable react/prop-types */}
-                            <DropdownMenuContent align="end">
-                              <SolveMenuItems
-                                solve={solve}
-                                onShowInfo={setInfoSolve}
-                                renderItem={(props) => (
-                                  <DropdownMenuItem
-                                    onClick={props.onClick}
-                                    variant={props.variant}
-                                  >
-                                    {props.children}
-                                  </DropdownMenuItem>
-                                )}
-                              />
-                            </DropdownMenuContent>
-                            {/* eslint-enable react/prop-types */}
-                          </DropdownMenu>
-                        </div>
-                      </td>
-                    </tr>
-                  </ContextMenuTrigger>
-                  {/* eslint-disable react/prop-types */}
-                  <ContextMenuContent>
-                    <SolveMenuItems
-                      solve={solve}
-                      onShowInfo={setInfoSolve}
-                      renderItem={(props) => (
-                        <ContextMenuItem
-                          onClick={props.onClick}
-                          variant={props.variant}
-                        >
-                          {props.children}
-                        </ContextMenuItem>
-                      )}
+                        }
+                        return newSelection
+                      })
+                    }}
+                  >
+                    <Checkbox
+                      className="pointer-events-none size-5 rounded-[8px] border-2! border-border transition-all duration-100"
+                      checked={selection.size > 0}
+                      variant={
+                        selection.size > 0 && selection.size < solvesData.length
+                          ? "indeterminate"
+                          : "default"
+                      }
                     />
-                  </ContextMenuContent>
-                  {/* eslint-enable react/prop-types */}
-                </ContextMenu>
-              )
-            })}
-            {paddingBottom > 0 ? (
-              <tr style={{ height: `${paddingBottom}px` }}>
-                <td colSpan={6} />
+                  </div>
+                </th>
+                <th
+                  className="p-2 text-muted-foreground"
+                  style={{ width: `${virtualRows[0]?.size ?? 42}px` }}
+                >
+                  #
+                </th>
+                <th className="px-6 text-center">Time</th>
+                <th className="px-6 text-center">ao5</th>
+                <th className="px-6 text-center">ao12</th>
+                <th
+                  className="p-2"
+                  style={{ width: `${virtualRows[0]?.size ?? 42}px` }}
+                >
+                  {selection.size > 0 && (
+                    <div className="flex size-full items-center justify-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="size-6 rounded-[8px]"
+                          >
+                            <MoreVerticalIcon />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel className="text-xs text-muted-foreground">
+                            {selection.size} solves selected
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={bulkActions.copyTimes}>
+                            Copy times
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={bulkActions.copySolves}>
+                            Copy solves
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={handleDelete}
+                            variant="destructive"
+                          >
+                            Delete solves
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+                </th>
               </tr>
-            ) : null}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paddingTop > 0 ? (
+                <tr style={{ height: `${paddingTop}px` }}>
+                  <td colSpan={6} />
+                </tr>
+              ) : null}
+              {virtualRows.map((virtualRow) => {
+                const solveIndex = virtualRow.index
+                const solve = solvesData[solveIndex]
+
+                if (!solve) return null
+
+                const displayIndex = solvesData.length - solveIndex
+
+                return (
+                  <ContextMenu key={solve.id}>
+                    <ContextMenuTrigger asChild>
+                      <tr
+                        className={cn(
+                          "cursor-pointer border-b border-border *:whitespace-nowrap *:select-none",
+                          {
+                            "bg-secondary/50": selection.has(solve.id),
+                          },
+                        )}
+                        style={{ height: `${virtualRow.size}px` }}
+                      >
+                        <td
+                          className="p-2"
+                          style={{ width: `${virtualRow.size}px` }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+
+                            setSelection((prev) => {
+                              const newSelection = new Set(prev)
+                              if (newSelection.has(solve.id)) {
+                                newSelection.delete(solve.id)
+                              } else {
+                                newSelection.add(solve.id)
+                              }
+                              return newSelection
+                            })
+                          }}
+                        >
+                          <div className="flex size-full cursor-pointer items-center justify-center">
+                            <Checkbox
+                              className="pointer-events-none size-5 rounded-[8px] border-2! border-border transition-all duration-100"
+                              checked={selection.has(solve.id)}
+                            />
+                          </div>
+                        </td>
+                        <td
+                          className="p-2 text-center text-muted-foreground"
+                          style={{ width: `${virtualRow.size}px` }}
+                        >
+                          {displayIndex}
+                        </td>
+                        <td className="px-6 text-center font-mono">
+                          {typeof solve.time === "undefined"
+                            ? "DNF"
+                            : formatTime(solve.time)}
+                        </td>
+                        <td className="px-6 text-center font-mono">
+                          {rollingAverages.ao5[solveIndex]}
+                        </td>
+                        <td className="px-6 text-center font-mono">
+                          {rollingAverages.ao12[solveIndex]}
+                        </td>
+                        <td
+                          className="p-2"
+                          style={{ width: `${virtualRow.size}px` }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="flex size-full items-center justify-center">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  className="size-6 rounded-[8px]"
+                                >
+                                  <MoreVerticalIcon />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              {/* eslint-disable react/prop-types */}
+                              <DropdownMenuContent align="end">
+                                <SolveMenuItems
+                                  solve={solve}
+                                  onShowInfo={setInfoSolve}
+                                  renderItem={(props) => (
+                                    <DropdownMenuItem
+                                      onClick={props.onClick}
+                                      variant={props.variant}
+                                    >
+                                      {props.children}
+                                    </DropdownMenuItem>
+                                  )}
+                                />
+                              </DropdownMenuContent>
+                              {/* eslint-enable react/prop-types */}
+                            </DropdownMenu>
+                          </div>
+                        </td>
+                      </tr>
+                    </ContextMenuTrigger>
+                    {/* eslint-disable react/prop-types */}
+                    <ContextMenuContent>
+                      <SolveMenuItems
+                        solve={solve}
+                        onShowInfo={setInfoSolve}
+                        renderItem={(props) => (
+                          <ContextMenuItem
+                            onClick={props.onClick}
+                            variant={props.variant}
+                          >
+                            {props.children}
+                          </ContextMenuItem>
+                        )}
+                      />
+                    </ContextMenuContent>
+                    {/* eslint-enable react/prop-types */}
+                  </ContextMenu>
+                )
+              })}
+              {paddingBottom > 0 ? (
+                <tr style={{ height: `${paddingBottom}px` }}>
+                  <td colSpan={6} />
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </>
       )}
       <SolveInfoDialog
         solve={infoSolve}

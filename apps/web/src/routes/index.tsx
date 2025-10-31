@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { ClientOnly, createFileRoute } from "@tanstack/react-router"
-import { PanelLeftOpenIcon } from "lucide-react"
+import { InfoIcon, PanelLeftOpenIcon } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 
 import { ScrambleDisplay } from "~/components/scramble-display"
@@ -8,6 +8,14 @@ import { SessionDisplay } from "~/components/session-display"
 import { SessionProvider, useSession } from "~/components/session-provider"
 import { TimerDisplay } from "~/components/timer-display"
 import { Button } from "~/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog"
 import { Sheet, SheetContent } from "~/components/ui/sheet"
 import { Spinner } from "~/components/ui/spinner"
 import { useEvent } from "~/hooks/useEvent"
@@ -132,6 +140,57 @@ const Home = () => {
         </div>
         <TimerDisplay {...timer} />
       </div>
+
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed right-4 bottom-4 z-50 opacity-30 transition-opacity hover:opacity-60"
+            aria-label="About this page"
+          >
+            <InfoIcon className="size-5" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>About Speedcube</DialogTitle>
+            <DialogDescription>
+              <div className="mt-4 space-y-3 text-left">
+                <div>
+                  <p className="mb-1 font-medium">Website</p>
+                  <a
+                    href="https://speedcube.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    https://speedcube.vercel.app/
+                  </a>
+                </div>
+                <div>
+                  <p className="mb-1 font-medium">Contact</p>
+                  <p>Leander Timon Riefel</p>
+                  <a
+                    href="mailto:riefel.leander@gmail.com"
+                    className="text-primary hover:underline"
+                  >
+                    riefel.leander@gmail.com
+                  </a>
+                </div>
+                <div>
+                  <p className="mb-1 font-medium">Data Storage</p>
+                  <p className="text-sm">
+                    This application uses IndexedDB and localStorage for data
+                    storage. You can view and manage this data through your
+                    browser&apos;s application settings and developer tools.
+                  </p>
+                </div>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </main>
   )
 }
