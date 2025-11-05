@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ClientOnly, createFileRoute } from "@tanstack/react-router"
-import { PanelLeftOpenIcon } from "lucide-react"
+import { InfoIcon, PanelLeftOpenIcon } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 
 import { ScrambleDisplay } from "~/components/scramble-display"
@@ -8,7 +8,17 @@ import { SessionDisplay } from "~/components/session-display"
 import { SessionProvider, useSession } from "~/components/session-provider"
 import { TimerDisplay } from "~/components/timer-display"
 import { Button } from "~/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog"
+import { Sheet, SheetContent } from "~/components/ui/sheet"
 import { Spinner } from "~/components/ui/spinner"
+import { useEvent } from "~/hooks/useEvent"
 import { useScrambleHistory } from "~/hooks/useScrambleHistory"
 import { useTimerController } from "~/hooks/useTimerController"
 import { cn } from "~/lib"
@@ -17,9 +27,26 @@ import { solveCollection } from "~/lib/db"
 const Home = () => {
   const { session } = useSession()
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false
+    return window.matchMedia("(max-width: 1023px)").matches
+  })
 
-  const scrambleHistory = useScrambleHistory("333")
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 1023px)")
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches)
+    }
+
+    mediaQuery.addEventListener("change", handleChange)
+    return () => mediaQuery.removeEventListener("change", handleChange)
+  }, [])
+
+  const { event } = useEvent()
+  const scrambleHistory = useScrambleHistory(event)
   const timer = useTimerController({
+    event,
     onSolve: (solve) => {
       scrambleHistory.goToNext()
 
@@ -43,6 +70,23 @@ const Home = () => {
 
   return (
     <main className="relative flex h-dvh justify-center overflow-hidden">
+      {/* Mobile Sheet (max-lg) */}
+      {isMobile && (
+        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+          <SheetContent
+            side="left"
+            className="w-md! max-w-md! p-0"
+            showCloseButton={false}
+          >
+            <SessionDisplay
+              isOpen={isSidebarOpen}
+              onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+            />
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {/* Desktop Sidebar (lg+) */}
       <motion.div
         initial={false}
         animate={{
@@ -55,15 +99,18 @@ const Home = () => {
           ease: [0.4, 0, 0.2, 1],
         }}
         className={cn(
-          "flex shrink-0 overflow-hidden",
+          "relative flex shrink-0 overflow-hidden max-lg:hidden",
           !isSidebarOpen && "pointer-events-none",
         )}
       >
-        <SessionDisplay
-          isOpen={isSidebarOpen}
-          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
+        <div className="absolute inset-y-0 left-0 w-md min-w-0 will-change-transform">
+          <SessionDisplay
+            isOpen={isSidebarOpen}
+            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
+        </div>
       </motion.div>
+
       <div className="grid size-full grid-rows-[auto_1fr] items-center border-l text-center">
         <div className="relative">
           <AnimatePresence>
@@ -93,6 +140,57 @@ const Home = () => {
         </div>
         <TimerDisplay {...timer} />
       </div>
+
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed right-4 bottom-4 z-50 opacity-30 transition-opacity hover:opacity-60"
+            aria-label="About this page"
+          >
+            <InfoIcon className="size-5" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>About Speedcube</DialogTitle>
+            <DialogDescription>
+              <div className="mt-4 space-y-3 text-left">
+                <div>
+                  <p className="mb-1 font-medium">Website</p>
+                  <a
+                    href="https://speedcube.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    https://speedcube.vercel.app/
+                  </a>
+                </div>
+                <div>
+                  <p className="mb-1 font-medium">Contact</p>
+                  <p>Leander Timon Riefel</p>
+                  <a
+                    href="mailto:riefel.leander@gmail.com"
+                    className="text-primary hover:underline"
+                  >
+                    riefel.leander@gmail.com
+                  </a>
+                </div>
+                <div>
+                  <p className="mb-1 font-medium">Data Storage</p>
+                  <p className="text-sm">
+                    This application uses IndexedDB and localStorage for data
+                    storage. You can view and manage this data through your
+                    browser&apos;s application settings and developer tools.
+                  </p>
+                </div>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </main>
   )
 }
@@ -127,3 +225,4 @@ export const Route = createFileRoute("/")({
     </div>
   ),
 })
+

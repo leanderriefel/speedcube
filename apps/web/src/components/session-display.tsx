@@ -1,11 +1,20 @@
 import { useCallback, useRef, useState } from "react"
 import { useLiveQuery } from "@tanstack/react-db"
-import { ChevronDownIcon, PanelLeftCloseIcon } from "lucide-react"
+import { ChevronDownIcon, PanelLeftCloseIcon, TrashIcon } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 
 import { useSession } from "~/components/session-provider"
 import { SolvesList } from "~/components/solves-list"
 import { Button } from "~/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +35,7 @@ export const SessionDisplay = ({ isOpen, onToggle }: SessionDisplayProps) => {
   const { session, setSessionId } = useSession()
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState(() => session.data?.name || "")
+  const [deleteSessionDialogOpen, setDeleteSessionDialogOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
@@ -104,20 +114,21 @@ export const SessionDisplay = ({ isOpen, onToggle }: SessionDisplayProps) => {
     }
   }
 
-  const deleteSession = () => {
-    const sessionId = session.data?.id
-    if (!sessionId) return
+  const deleteSession = (sessionId?: string) => {
+    const idToDelete = sessionId ?? session.data?.id
+    if (!idToDelete) return
     if (sessions.data?.length === 1) return
 
-    const nextSessionId = sessions.data.find((s) => s.id !== sessionId)?.id
+    const nextSessionId = sessions.data.find((s) => s.id !== idToDelete)?.id
     if (!nextSessionId) return
 
-    sessionCollection.delete(sessionId)
+    sessionCollection.delete(idToDelete)
     setSessionId(nextSessionId)
+    setDeleteSessionDialogOpen(false)
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col self-stretch overflow-hidden pt-4 sm:pt-8">
+    <div className="flex size-full min-h-0 flex-col self-stretch overflow-hidden pt-4 sm:pt-8">
       <div className="mb-4 flex w-full items-center justify-between gap-x-4 px-4 sm:mb-8 sm:px-8">
         <h2 className="text-lg font-semibold">
           <input
@@ -153,12 +164,53 @@ export const SessionDisplay = ({ isOpen, onToggle }: SessionDisplayProps) => {
             <DropdownMenuContent>
               <DropdownMenuGroup>
                 {sessions.data?.map((session) => (
-                  <DropdownMenuItem
-                    key={session.id}
-                    onClick={() => setSessionId(session.id)}
-                  >
-                    {session.name}
-                  </DropdownMenuItem>
+                  <div key={session.id} className="flex items-center gap-x-1">
+                    <DropdownMenuItem
+                      className="grow"
+                      onClick={() => setSessionId(session.id)}
+                    >
+                      {session.name}
+                    </DropdownMenuItem>
+                    {sessions.data?.length > 1 && (
+                      <Dialog
+                        open={deleteSessionDialogOpen}
+                        onOpenChange={setDeleteSessionDialogOpen}
+                      >
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="rounded-xs hover:bg-destructive/10! hover:text-destructive!"
+                          >
+                            <TrashIcon className="size-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Delete session</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to delete this session? This
+                              action cannot be undone.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter>
+                            <Button
+                              variant="outline"
+                              onClick={() => setDeleteSessionDialogOpen(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() => deleteSession(session.id)}
+                            >
+                              Delete
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
                 ))}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
