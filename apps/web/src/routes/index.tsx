@@ -75,7 +75,7 @@ const Home = () => {
         <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
           <SheetContent
             side="left"
-            className="w-md! max-w-md! p-0"
+            className="w-md! max-w-[100vw]! p-0"
             showCloseButton={false}
           >
             <SessionDisplay
